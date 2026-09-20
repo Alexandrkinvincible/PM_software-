@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDisplayName</key>
+  <string>Field Task</string>
+  <key>CFBundleShortVersionString</key>
+  <string>$(MARKETING_VERSION)</string>
+  <key>CFBundleVersion</key>
+  <string>$(CURRENT_PROJECT_VERSION)</string>
+  <key>SUPABASE_URL</key>
+  <string>$(SUPABASE_URL)</string>
+  <key>SUPABASE_ANON_KEY</key>
+  <string>$(SUPABASE_ANON_KEY)</string>
+
+  <!-- Phase 4 uses the camera directly; the string is here from the start
+       so the first camera build is not blocked on an App Store rejection. -->
+  <key>NSCameraUsageDescription</key>
+  <string>Photographs of completed work and receipts are attached to the task you close out.</string>
+
+  <key>UILaunchScreen</key>
+  <dict/>
+  <!-- Portrait only. This is used one-handed on a ladder. -->
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+  </array>
+</dict>
+</plist>

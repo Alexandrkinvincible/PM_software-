@@ -1,0 +1,11 @@
+// Copy this file to Config.xcconfig and fill in your Supabase project.
+// Config.xcconfig is gitignored: the anon key is public by design, but a
+// project URL still identifies the customer's data, and the file is the
+// obvious place someone will one day paste a service-role key by mistake.
+//
+// The service-role key must NEVER appear in this app. It bypasses every
+// row-level security policy in 0002_rls.sql. It belongs only in the Edge
+// Function, where Supabase injects it server-side.
+
+SUPABASE_URL = https:/$()/YOUR-PROJECT.supabase.co
+SUPABASE_ANON_KEY = your-anon-key
