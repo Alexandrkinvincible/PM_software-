@@ -7,12 +7,12 @@
 
 name: PMController
 options:
-  bundleIdPrefix: com.pmcontroller
+  bundleIdPrefix: com.apexmech
   deploymentTarget:
-    # A deployment target is a MINIMUM, not a maximum: 16.0 runs on 16,
-    # 18, 26 and everything after. 16 is the oldest floor that costs
-    # almost nothing — see docs/DECISIONS.md A5.
-    iOS: "16.0"
+    # A deployment target is a MINIMUM, not a maximum: 18.0 runs on 18,
+    # 26 and everything after. There is no iOS 19–25 — Apple went from 18
+    # straight to 26 in 2025. See docs/DECISIONS.md A5.
+    iOS: "18.0"
   createIntermediateGroups: true
 
 packages:
@@ -39,7 +39,7 @@ targets:
         product: Supabase
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.pmcontroller.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.apexmech.pmcontroller
         # 1 = iPhone, 2 = iPad. One binary, two layouts, chosen by size
         # class at runtime. Tablet is the design target; phone follows.
         TARGETED_DEVICE_FAMILY: "1,2"

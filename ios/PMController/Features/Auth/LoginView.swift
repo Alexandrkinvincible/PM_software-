@@ -1,7 +1,14 @@
+//
+//  PM Controller
+//  Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+//
+//  Proprietary and confidential. See LICENSE at the repository root.
+//
+
 import SwiftUI
 
 struct LoginView: View {
-    @EnvironmentObject private var session: Session
+    @Environment(Session.self) private var session
     @State private var email = ""
     @State private var password = ""
     @State private var isWorking = false

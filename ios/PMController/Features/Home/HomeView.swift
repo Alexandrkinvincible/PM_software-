@@ -1,3 +1,10 @@
+//
+//  PM Controller
+//  Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+//
+//  Proprietary and confidential. See LICENSE at the repository root.
+//
+
 import SwiftUI
 
 /// Phase 1's home screen, and nothing more: who you are, what you may do,
@@ -5,7 +12,7 @@ import SwiftUI
 /// progress page are Phases 2 through 7 and are not stubbed here — a stub
 /// a Lead can tap is a support call.
 struct HomeView: View {
-    @EnvironmentObject private var session: Session
+    @Environment(Session.self) private var session
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showingAdmin = false
 
@@ -47,11 +54,11 @@ struct HomeView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if role?.isAdmin == true {
-                    ToolbarItem(placement: .navigationBarTrailing) {
+                    ToolbarItem(placement: .topBarTrailing) {
                         Button("Add person") { showingAdmin = true }
                     }
                 }
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .topBarLeading) {
                     Button("Sign out") { Task { await session.signOut() } }
                 }
             }

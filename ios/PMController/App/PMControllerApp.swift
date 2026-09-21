@@ -1,17 +1,22 @@
+//
+//  PM Controller
+//  Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+//
+//  Proprietary and confidential. See LICENSE at the repository root.
+//
+
 import SwiftUI
 
 @main
 struct PMControllerApp: App {
-    // @StateObject rather than @State: Session is an ObservableObject so
-    // the app runs on iOS 16, where @Observable does not exist.
-    @StateObject private var session: Session = AppConfig.isPreview
+    @State private var session: Session = AppConfig.isPreview
         ? .preview(persona: AppConfig.previewPersona)
         : Session()
 
     var body: some Scene {
         WindowGroup {
             RootView()
-                .environmentObject(session)
+                .environment(session)
                 .task { await session.start() }
         }
     }

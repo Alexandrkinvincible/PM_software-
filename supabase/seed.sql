@@ -1,3 +1,7 @@
+-- PM Controller
+-- Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+-- Proprietary and confidential. See LICENSE at the repository root.
+
 -- =====================================================================
 -- Seed — one project, one user per role, plus the second Foreman and
 -- second Lead that make the isolation tests meaningful. A matrix you
@@ -29,7 +33,7 @@ on conflict (id) do nothing;
 
 -- ---- companies --------------------------------------------------------
 insert into companies (id, name, is_house, phone) values
-  ('00000000-0000-4000-8000-0000000000c1', 'Meridian Mechanical', true,  '555-0100'),
+  ('00000000-0000-4000-8000-0000000000c1', 'Apex Plumbing & Mechanical', true,  '555-0100'),
   ('00000000-0000-4000-8000-0000000000c2', 'Harbor Mechanical (sub)',    false, '555-0200')
 on conflict (id) do nothing;
 

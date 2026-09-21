@@ -1,3 +1,7 @@
+// PM Controller
+// Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+// Proprietary and confidential. See LICENSE at the repository root.
+
 // =====================================================================
 // admin-create-user — the only privileged operation in Phase 1.
 //

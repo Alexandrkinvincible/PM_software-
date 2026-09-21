@@ -1,9 +1,10 @@
 # PM Controller — SPEC
 
 **Name:** PM Controller. Locked. Bundle identifier `com.pmcontroller.app`.
-**Owner:** Alex Kulikov.
-**Standing:** an independent product, not an internal tool for any one contractor. Apex
-Plumbing & Mechanical is where the problem was found, not the owner of the result.
+**Owner:** Apex Plumbing & Mechanical. Alex Kulikov, principal.
+**Standing:** Apex owns the software outright — see `LICENSE`, and the copyright header on
+every source file. PCM is a pilot customer, not a co-owner. Apex owns the product; a customer
+owns its own records. That split belongs in writing before any customer data is entered.
 **Pilot customer:** Paulson Cheek Mechanical (PCM).
 **Client platform:** native iOS / iPadOS (SwiftUI). **Tablet first.** See §9.
 
@@ -185,14 +186,15 @@ principle above are unchanged, because they never depended on the client.
 
 - **Supabase** — Postgres, auth, row-level security, storage for photos and receipts.
   Unchanged from the original spec.
-- **SwiftUI, iOS/iPadOS 16 and newer**, one binary for both. **Tablet is the design target**;
+- **SwiftUI, iOS/iPadOS 18 and newer**, one binary for both. **Tablet is the design target**;
   the phone layout follows from it by size class. A tablet rotates freely; a phone stays
   portrait, because that one is used one-handed on a ladder.
 
-  A deployment target is a *minimum*, not a maximum. A 16.0 floor runs on 16, 18, 26 and
-  everything after it — Apple's jump from 18 to 26 in 2025 changed the numbering, not the
-  compatibility rule. 16 is the oldest floor that costs almost nothing; see `docs/DECISIONS.md`
-  A5 for what going further back would cost.
+  A deployment target is a *minimum*, not a maximum: an 18.0 floor runs on 18, 26 and everything
+  after. **There is no iOS 19–25** — Apple switched to year-based numbering in 2025 and went
+  from 18 straight to 26. 18 is the 2024 release, and the floor is set there deliberately: it
+  keeps `@Observable`, `#Preview` and the modern SwiftUI surface rather than writing to an older
+  dialect. See `docs/DECISIONS.md` A5.
 - **supabase-swift** for auth, PostgREST and storage. The app ships the anon key only; every
   query carries the signed-in user's JWT, so the policies in `0002_rls.sql` are what decides.
 - **Supabase Edge Functions** for anything needing the service-role key. Today that is one
@@ -272,11 +274,11 @@ Those are Phase 10+, only if the pilot earns them.
 - Should Supervisor have wider material visibility than Foreman?
 - Written sign-off from PCM ownership before any PCM data lives in a system you own; data
   ownership if the relationship ends.
-- Which iPads and iPhones do the crews actually carry? The floor is iOS/iPadOS 16, which is
-  meant to cover anything plausibly in service. If something older turns up, say so — going to
-  15 is possible but costs more (A5).
-- Is there a Mac available for interactive development? CI covers building and screenshots, but
-  not live iteration.
+- Which iPads and iPhones do the crews actually carry? The floor is iOS/iPadOS 18. Anything
+  that cannot reach 18 is out, deliberately.
+- Does Apex control the `apexmech.com` domain? The bundle identifier `com.apexmech.pmcontroller`
+  assumes a reverse-DNS name Apex owns. Cheap to change now, awkward after App Store submission.
+
 
 
 ---

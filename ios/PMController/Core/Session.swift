@@ -1,3 +1,10 @@
+//
+//  PM Controller
+//  Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+//
+//  Proprietary and confidential. See LICENSE at the repository root.
+//
+
 import Foundation
 import Supabase
 
@@ -12,7 +19,8 @@ import Supabase
 // =====================================================================
 
 @MainActor
-final class Session: ObservableObject {
+@Observable
+final class Session {
 
     enum State: Equatable {
         case loading
@@ -23,10 +31,10 @@ final class Session: ObservableObject {
         case ready
     }
 
-    @Published private(set) var state: State = .loading
-    @Published private(set) var user: AppUser?
-    @Published private(set) var memberships: [Membership] = []
-    @Published private(set) var errorMessage: String?
+    private(set) var state: State = .loading
+    private(set) var user: AppUser?
+    private(set) var memberships: [Membership] = []
+    private(set) var errorMessage: String?
 
     /// The role to show in the UI when no single project is selected.
     /// A Manager is company-wide; everyone else is described by the job
@@ -82,7 +90,7 @@ final class Session: ObservableObject {
         }
     }
 
-    @Published private(set) var isPreview = false
+    private(set) var isPreview = false
 
     // -----------------------------------------------------------------
     // Lifecycle

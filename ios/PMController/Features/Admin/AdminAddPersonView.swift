@@ -1,3 +1,10 @@
+//
+//  PM Controller
+//  Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+//
+//  Proprietary and confidential. See LICENSE at the repository root.
+//
+
 import SwiftUI
 
 // =====================================================================
@@ -12,7 +19,7 @@ import SwiftUI
 // =====================================================================
 
 struct AdminAddPersonView: View {
-    @EnvironmentObject private var session: Session
+    @Environment(Session.self) private var session
     @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""

@@ -6,8 +6,8 @@ by-product of work the crew already does, rather than a separate reporting step.
 
 Tablet first. Phone second. Laptop later.
 
-Owner: Alex Kulikov. An independent product, not an internal tool for any one contractor.
-Pilot customer: Paulson Cheek Mechanical.
+Owned by Apex Plumbing & Mechanical — see [LICENSE](LICENSE). Pilot customer: Paulson Cheek
+Mechanical. Apex owns the software; a customer owns its own records.
 
 **[SPEC.md](SPEC.md) is authoritative.** Every phase reads it.
 [docs/DECISIONS.md](docs/DECISIONS.md) records what was assumed and why.
@@ -120,8 +120,11 @@ The anon key is the only key that ships. Every query carries the signed-in user'
 
 ### 4. Before you get much further
 
-- **Confirm which iPads and iPhones the crews carry.** The floor is iOS/iPadOS 16, which runs on
-  16, 18, 26 and everything after — a deployment target is a minimum, not a maximum.
+- **Confirm which iPads and iPhones the crews carry.** The floor is iOS/iPadOS 18, which runs on
+  18, 26 and everything after — a deployment target is a minimum, not a maximum. There is no
+  iOS 19–25; Apple went from 18 straight to 26.
+- **Confirm Apex controls `apexmech.com`.** The bundle identifier assumes it. Cheap to change
+  now, awkward after App Store submission.
 - **Start Apple Developer enrolment** ($99/yr) only when you are ready to put builds on other
   people's devices. See below — you do not need it before then.
 
@@ -136,12 +139,13 @@ The anon key is the only key that ships. Every query carries the signed-in user'
 | Put it on someone **else's** iPad (TestFlight) | $99/yr Apple Developer Program |
 | App Store | $99/yr |
 
-**And without a Mac:** every push runs CI on a free macOS runner, which compiles the app, boots
-an iPad simulator, launches it as each role, and uploads photographs of every screen. Open the
-run under **Actions → Screenshots on iPad → Artifacts** and download
-`PMController-iPad-screenshots`.
+**You have a MacBook Pro, so the top two rows are already open to you** — build it, run it in the
+iPad Simulator, and install it on your own iPad, without an Apple Developer account.
 
-What CI cannot replace is live iteration — clicking through and changing something on the spot.
+CI still earns its keep: every push compiles the app on a macOS runner and uploads photographs of
+every screen from an iPad simulator (**Actions → Screenshots on iPad → Artifacts**). That is a
+second pair of eyes on a clean machine, and it catches anything that only builds because of
+something local to your Mac.
 
 ---
 

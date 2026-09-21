@@ -1,9 +1,16 @@
+//
+//  PM Controller
+//  Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+//
+//  Proprietary and confidential. See LICENSE at the repository root.
+//
+
 import SwiftUI
 
 /// First login. The issued password is a delivery mechanism, not a
 /// credential — this screen is the only thing in the app until it is gone.
 struct ChangePasswordView: View {
-    @EnvironmentObject private var session: Session
+    @Environment(Session.self) private var session
     @State private var password = ""
     @State private var confirmation = ""
     @State private var isWorking = false

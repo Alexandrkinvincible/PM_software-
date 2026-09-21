@@ -77,14 +77,14 @@ jobs:
       - name: Check the deployment target has not drifted up
         run: |
           set -euo pipefail
-          # The compiler is the real guard: with a 16.0 floor it refuses
+          # The compiler is the real guard: with an 18.0 floor it refuses
           # any newer API outright. This only catches someone raising the
           # floor itself, which the compiler would happily accept.
           FLOOR=$(grep -A4 'deploymentTarget:' ios/project.yml \
                   | grep -o 'iOS: "[0-9.]*"' | grep -o '[0-9.]*')
           echo "deployment target: iOS $FLOOR"
-          if [ "$FLOOR" != "16.0" ]; then
-            echo "::error::Deployment target moved to $FLOOR; the agreed floor is 16.0."
+          if [ "$FLOOR" != "18.0" ]; then
+            echo "::error::Deployment target moved to $FLOOR; the agreed floor is 18.0."
             exit 1
           fi
 
@@ -172,11 +172,17 @@ jobs:
           set -euo pipefail
           mkdir -p screenshots
           xcrun simctl install "$DEVICE" PMController.app
+          # Read the identifier from the bundle that was actually built
+          # rather than repeating it here, so a rename cannot break this.
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" \
+                      PMController.app/Info.plist)
+          echo "bundle id: $BUNDLE_ID"
+          echo "BUNDLE_ID=$BUNDLE_ID" >> "$GITHUB_ENV"
 
           shoot() {
             local name="$1"; shift
-            xcrun simctl terminate "$DEVICE" com.pmcontroller.app 2>/dev/null || true
-            xcrun simctl launch "$DEVICE" com.pmcontroller.app "$@"
+            xcrun simctl terminate "$DEVICE" "$BUNDLE_ID" 2>/dev/null || true
+            xcrun simctl launch "$DEVICE" "$BUNDLE_ID" "$@"
             sleep 6   # let SwiftUI lay out before the shutter
             xcrun simctl io "$DEVICE" screenshot "screenshots/$name.png"
             echo "captured $name"
@@ -199,8 +205,8 @@ jobs:
           set -euo pipefail
           # A tablet spends most of its life on its side; the two-column
           # layout only appears at that width.
-          xcrun simctl terminate "$DEVICE" com.pmcontroller.app 2>/dev/null || true
-          xcrun simctl launch "$DEVICE" com.pmcontroller.app \
+          xcrun simctl terminate "$DEVICE" "$BUNDLE_ID" 2>/dev/null || true
+          xcrun simctl launch "$DEVICE" "$BUNDLE_ID" \
             -PMControllerPreview YES -PMControllerPreviewRole super
           sleep 6
           xcrun simctl io "$DEVICE" screenshot screenshots/07-home-super-landscape.png || true

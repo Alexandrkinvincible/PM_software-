@@ -1,3 +1,7 @@
+-- PM Controller
+-- Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+-- Proprietary and confidential. See LICENSE at the repository root.
+
 -- =====================================================================
 -- PM Controller
 -- Migration 0001 — Schema only (RLS in 0002, seed in seed.sql)

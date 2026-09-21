@@ -1,3 +1,10 @@
+//
+//  PM Controller
+//  Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+//
+//  Proprietary and confidential. See LICENSE at the repository root.
+//
+
 import SwiftUI
 
 /// The whole of Phase 1's navigation.
@@ -6,7 +13,7 @@ import SwiftUI
 /// and nothing behind it to peek at — which is the point of issuing
 /// credentials rather than letting people register themselves.
 struct RootView: View {
-    @EnvironmentObject private var session: Session
+    @Environment(Session.self) private var session
 
     var body: some View {
         switch session.state {
@@ -80,34 +87,24 @@ struct SetupNeededView: View {
     }
 }
 
-// #Preview is an iOS 17 macro. PreviewProvider is the portable
-// spelling and gives the same canvases in Xcode.
-@MainActor
-struct PMControllerPreviews: PreviewProvider {
-    static var previews: some View {
-        Group {
-            HomeView()
-                .environmentObject(Session.preview())
-                .previewDisplayName("Home — Super")
+#Preview("Home — Super") {
+    HomeView().environment(Session.preview())
+}
 
-            HomeView()
-                .environmentObject(
-                    Session.preview(user: PreviewData.lead,
-                                    memberships: PreviewData.leadMemberships)
-                )
-                .previewDisplayName("Home — Lead")
+#Preview("Home — Lead") {
+    HomeView().environment(
+        Session.preview(user: PreviewData.lead, memberships: PreviewData.leadMemberships)
+    )
+}
 
-            LoginView()
-                .environmentObject(Session.preview(state: .signedOut))
-                .previewDisplayName("Sign in")
+#Preview("Sign in") {
+    LoginView().environment(Session.preview(state: .signedOut))
+}
 
-            ChangePasswordView()
-                .environmentObject(Session.preview(state: .mustChangePassword))
-                .previewDisplayName("First login")
+#Preview("First login") {
+    ChangePasswordView().environment(Session.preview(state: .mustChangePassword))
+}
 
-            SetupNeededView()
-                .previewDisplayName("Not connected")
-        }
-        .previewDevice("iPad Pro (12.9-inch) (6th generation)")
-    }
+#Preview("Not connected") {
+    SetupNeededView()
 }

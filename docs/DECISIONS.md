@@ -8,12 +8,29 @@ is that log.
 
 ## A. Name, standing, platform
 
-**A0 — The app is called PM Controller, and it is a product, not an Apex tool.**
-Decided by the owner. Bundle identifier `com.pmcontroller.app`. Everything Apex-branded is out:
-the demo company in `supabase/seed.sql` is now "Meridian Mechanical" and the demo client
-"Northside Construction Group", so nothing in the repo implies one contractor owns it. The repo
-directory name (`PM_software-`) is unchanged because renaming it breaks existing clone URLs; it
-is cosmetic and can be changed later from GitHub's settings if wanted.
+**A0 — The app is called PM Controller and Apex Plumbing & Mechanical owns it.**
+Both decided by the owner. The ownership position was reversed mid-build: it was first separated
+from Apex, then reinstated. The current position is the one recorded here, and it matches the
+original Phase 0 package ("build and own it under Apex").
+
+Ownership is asserted in the code, not just asserted in conversation:
+
+- `LICENSE` at the repository root — proprietary, all rights reserved, with the software/data
+  split written out (Apex owns the software; a customer owns its own records).
+- A copyright header on all 17 source files — Swift, SQL and the Edge Function.
+- `NSHumanReadableCopyright` in the app bundle, so it appears in the shipped binary.
+- Bundle identifier `com.apexmech.pmcontroller`.
+- The demo house company in `supabase/seed.sql` is Apex again.
+
+**Two things to settle, neither of which code can decide.** First, the bundle identifier assumes
+Apex controls `apexmech.com`; reverse-DNS identifiers should use a domain you actually own, and
+this is cheap to change now and awkward after App Store submission. Second, the LICENSE asserts
+Apex's ownership but a pilot customer will reasonably want its own data ownership in writing —
+the licence says so, but a signed agreement is what settles it, and the Phase 0 risk list already
+flagged that as pre-go-live work.
+
+The repo directory name (`PM_software-`) is unchanged because renaming it breaks existing clone
+URLs; it is cosmetic and can be changed from GitHub's settings later.
 
 **A1 — Native iOS instead of a React PWA.**
 Decided by the owner. SPEC §9 is updated accordingly and the trade-off is written out there in
@@ -34,44 +51,46 @@ A laptop version later is not free: SwiftUI reaches the Mac through Catalyst or 
 target, and neither is a checkbox. Worth deciding before Phase 7, since the progress page is the
 screen that most wants a big display.
 
-**A5 — Deployment target is iOS/iPadOS 16.0, so the app runs on 16 through 26 and beyond.**
-Asked for as "iOS 26 and older". Worth stating plainly because it is a common trap: a deployment
-target is the **minimum** OS the app will install on, never the maximum. The previous 17.0 floor
-already ran on 26; it simply excluded anything older. Apple's jump from iOS 18 to iOS 26 in 2025
-renumbered the releases, it did not change that rule.
+**A5 — Deployment target is iOS/iPadOS 18.0.**
+Settled after two moves, both from the owner: first "iOS 26 and older" (read as *go back
+further*), then "as old as 24… I want to be new" (read as *stop going back*). 18.0 is where it
+landed.
 
-So the real question was how far *back* to go, and that is a cost question:
+**There is no iOS 24, and no 19 through 25.** Apple switched to year-based numbering in 2025 and
+went from iOS 18 straight to iOS 26. This session's own CI logs are the evidence: the runner
+carries Xcode 26.6, SDK `iphonesimulator26.5`, and newest runtime
+`com.apple.CoreSimulator.SimRuntime.iOS-26-5`. The real choices were 17, 18 and 26. 18 is the
+2024 release, so it is the nearest real thing to what was asked for.
 
-| Floor | What it costs |
+| Floor | Consequence |
 |---|---|
-| 17 | Nothing — where we started |
-| **16** | **`@Observable` → `ObservableObject`, `#Preview` → `PreviewProvider`, `.topBarTrailing` → `.navigationBarTrailing`. Nine call sites. Chosen.** |
-| 15 | The above, plus losing `NavigationStack`, `.presentationDetents` and `.tracking` — a real rewrite of the navigation layer |
+| 16 | Costs `@Observable`, `#Preview` and `.topBarTrailing`. Tried, then reverted. |
+| 17 | Modern SwiftUI, widest device reach of the three |
+| **18** | **Modern SwiftUI plus the 2024 additions. Chosen.** |
+| 26 | Newest only; excludes anyone who has not updated in a year — risky for a crew |
 
-16 was chosen because it is the last cheap step. It picks up roughly the 2017-era iPads that 17
-drops, which is exactly the kind of hand-me-down tablet that ends up on a job site. Going to 15
-buys only hardware from around 2014, which will not run this usefully.
+The iOS 16 work is fully reverted: `Session` is `@Observable` again, the views use
+`@Environment(Session.self)`, and the previews are `#Preview` macros. The one change from that
+detour that was kept is `loadProfile(userId:)`, which takes the id from the auth stream — that
+was an improvement independent of the version, not a compatibility shim.
 
-The cost is that `Session` is now an `ObservableObject` with `@Published` properties rather than
-the tidier `@Observable`. That is a fair trade for not discovering mid-pilot that a Lead's tablet
-cannot install the app. Raising the floor later is a one-line change plus deleting compatibility
-spellings; lowering it after the fact is not.
+**Reverting cost two CI cycles.** Worth recording plainly: the 16.0 conversion introduced a
+build failure (`@EnvironmentObject` cannot infer its type), it was fixed, and then the whole
+thing was undone one message later. A floor is cheap to raise and expensive to lower, which
+argued for going low early — but the actual lesson is that the device inventory should have been
+settled before any of it.
 
-**What CI can and cannot prove here.** The compiler enforces the floor: with a 16.0 deployment
-target it refuses any newer API outright, so an accidental iOS 17-only call fails the build. What
-CI cannot do is *run* the app on iOS 16 — GitHub's runners carry only recent simulator runtimes.
-Actual behaviour on an old iPad still needs an old iPad.
-
-**A4 — Shipping does not require the $99 Apple Developer Program, and seeing it does not
-require a Mac.**
+**A4 — A Mac is available, and the $99 Apple Developer Program is still not needed yet.**
 The question was asked directly, so the answer is recorded. The paid program is needed only to
 put a build on *other people's* devices — TestFlight or the App Store. A free Apple ID builds,
 runs in the Simulator, and installs on a device you own yourself (re-signing every 7 days).
 
-The real prerequisite is a Mac. CI covers most of what that would otherwise be for: GitHub's
-macOS runners are free on public repositories, so `.github/workflows/ci.yml` compiles the app and
-publishes screenshots of it running on an iPad as an artifact of every run. What CI cannot give
-is live iteration — clicking through, changing something, seeing it immediately.
+The owner has a MacBook Pro, which settles the real prerequisite: building, running in the iPad
+Simulator and installing on a personally-owned iPad all work now, with a free Apple ID.
+
+CI is no longer the only window, but it still earns its keep — it compiles on a clean machine and
+photographs every screen, which catches anything that builds locally only because of something
+already installed on that Mac.
 
 **A3 — The Xcode project is generated, not committed.**
 `ios/project.yml` plus XcodeGen. A `.pbxproj` is unreviewable in a pull request and is the single
@@ -240,7 +259,8 @@ These are not decided. They are carried from SPEC §13 and need answers from PCM
 - Whether PCM shares estimated hours per system or only total contract hours.
 - Whether Supervisor should have wider material visibility than Foreman (C5 assumes not).
 - Written sign-off from PCM ownership before any PCM data lives in a system you own.
-- Which iPads and iPhones the crews carry (A2, A5). The 16.0 floor is a guess at "anything
-  plausibly in service"; a real inventory would confirm or cheapen it.
-- Whether a Mac is available for interactive development (A4).
+- Which iPads and iPhones the crews carry (A2, A5). The 18.0 floor excludes anything older; an
+  inventory would confirm nothing in service is cut off.
+- Whether Apex controls `apexmech.com`, which the bundle identifier assumes (A0).
+- Data-ownership terms with PCM in writing before any of its data is entered (A0).
 - Whether the laptop version is Catalyst or a separate Mac target (A2). Decide before Phase 7.

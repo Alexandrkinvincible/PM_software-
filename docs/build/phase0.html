@@ -80,9 +80,9 @@
 <h1>PM Controller</h1>
 <p class="sub">Phase 0 — Action plan, milestones and build package · <b>tablet first</b></p>
 <div class="meta">
-  <span><b>Owner</b> Alex Kulikov · independent product</span>
+  <span><b>Owner</b> Apex Plumbing &amp; Mechanical</span>
   <span><b>Pilot</b> Paulson Cheek Mechanical</span>
-  <span><b>Client</b> iPad first · SwiftUI</span>
+  <span><b>Client</b> iPad first · SwiftUI · iOS 18+</span>
   <span><b>Backend</b> Supabase Postgres</span>
   <span><b>Issued</b> 20 September 2026</span>
 </div>
@@ -110,17 +110,17 @@ internal testers with each build expiring after 90 days.
 <h3>What it does <i>not</i> cost — seeing it work before paying for anything</h3>
 <table class="nobreak">
   <tr><th style="width:52%">What you want to do</th><th>What it actually costs</th></tr>
-  <tr><td>Compile it and run it in a Simulator</td><td>A Mac. <b>No Apple account at all.</b></td></tr>
-  <tr><td>Install it on an iPad <b>you own</b></td><td>A Mac and a <b>free</b> Apple ID. Re-sign every 7 days.</td></tr>
+  <tr><td>Compile it and run it in a Simulator</td><td>A Mac. <b>No Apple account at all.</b> ✓ available</td></tr>
+  <tr><td>Install it on an iPad <b>you own</b></td><td>A Mac and a <b>free</b> Apple ID. Re-sign every 7 days. ✓ available</td></tr>
   <tr><td>Put it on someone <b>else's</b> iPad (TestFlight)</td><td>$99/yr Apple Developer Program</td></tr>
   <tr><td>App Store</td><td>$99/yr</td></tr>
 </table>
 <div class="box good">
-<b>And without a Mac at all.</b> GitHub's macOS runners are free on public repositories, so CI
-compiles the app, boots an iPad simulator, launches it as each role, and uploads photographs of
-every screen as an artifact of every run. You can look at the real app before buying a thing.
-What that cannot give you is live iteration — clicking through and changing something on the
-spot. <b>The genuine prerequisite is a Mac, not the $99.</b>
+<b>A MacBook Pro is available</b>, so the first two rows are already open: build it, run it in the
+iPad Simulator, and install it on your own iPad with a free Apple ID. The $99 is only needed to
+put a build on <i>someone else's</i> device. CI still compiles on a clean machine and photographs
+every screen each run, which catches anything that builds locally only because of something
+already installed on that Mac.
 </div>
 
 <h2>2. Status flow — unchanged, and locked in the database</h2>
@@ -243,9 +243,12 @@ when a rule regresses, so it gates CI.
 <ul class="chk">
   <li class="done"><b>Name the app and lock it.</b> PM Controller. Bundle identifier <code>com.pmcontroller.app</code>.</li>
   <li class="done"><b>Separate it from Apex.</b> An independent product; no contractor's name anywhere in the repo or the demo data.</li>
-  <li><b>Answer: is there a Mac available?</b> This is the real gate, not the $99. Without one, CI screenshots are the only way to see the app.</li>
+  <li class="done"><b>A Mac is available.</b> MacBook Pro — building, Simulator and personal-device install are all open without an Apple Developer account.</li>
+  <li class="done"><b>Ownership settled.</b> Apex Plumbing &amp; Mechanical owns it: LICENSE, a copyright header on every source file, and <code>NSHumanReadableCopyright</code> in the shipped bundle.</li>
+  <li><b>Confirm Apex controls <code>apexmech.com</code>.</b> The bundle identifier <code>com.apexmech.pmcontroller</code> assumes it. Cheap now, awkward after App Store submission.</li>
+  <li><b>Data-ownership terms with PCM in writing</b> before any of its data is entered. Apex owns the software; the customer owns its records — the LICENSE says so, a signed agreement settles it.</li>
   <li><b>Create the Supabase project</b> (free tier is sufficient for the pilot) and apply <code>0001</code>, <code>0002</code>, then seed.</li>
-  <li><b>Confirm which iPads and iPhones the crews actually carry.</b> iPadOS 17 is assumed; an iPad 5 drops the target to 16.</li>
+  <li><b>Confirm which iPads and iPhones the crews actually carry.</b> The floor is iOS/iPadOS 18 — anything that cannot reach 18 is deliberately out. Note there is no iOS 19–25: Apple went from 18 straight to 26.</li>
   <li><b>Apple Developer Program enrolment</b> ($99/yr) — only when you are ready to put builds on other people's devices. Not before.</li>
 </ul>
 
@@ -282,7 +285,7 @@ when a rule regresses, so it gates CI.
 <table>
   <tr><th style="width:34%">Risk</th><th>Handling</th></tr>
   <tr><td>Leads don't close tasks in the field</td><td>Close-out under 60 seconds: crew already selected, camera one tap, quantity one field. Measured on a real phone in Phase 4, not assumed.</td></tr>
-  <tr><td>PCM says "that's just part of your job"</td><td>PM Controller is an independent product, built on your own time and infrastructure. PCM is the pilot customer, not the owner. In writing before go-live.</td></tr>
+  <tr><td>PCM says "that's just part of your job"</td><td>Apex owns PM Controller outright — asserted in LICENSE and in every source file. PCM is the pilot customer, not a co-owner. Get it in writing before go-live.</td></tr>
   <tr><td>Rework becomes a blame tool</td><td>Reasons describe the condition, not the person. Defect rate is never shown per individual — by system, area and phase only. This is built in, not policy.</td></tr>
   <tr><td>Scope creep into a full ERP</td><td>v1 ships with no scheduling, no invoicing, no payroll export, no Android.</td></tr>
   <tr><td>App Store review delays a fix</td><td>TestFlight for the pilot; expedited review exists for genuine blockers. Budget 24–48 hours for any store release.</td></tr>

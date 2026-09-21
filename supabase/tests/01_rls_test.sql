@@ -1,3 +1,7 @@
+-- PM Controller
+-- Copyright © 2026 Apex Plumbing & Mechanical. All rights reserved.
+-- Proprietary and confidential. See LICENSE at the repository root.
+
 -- =====================================================================
 -- Phase 1 acceptance test.
 --
