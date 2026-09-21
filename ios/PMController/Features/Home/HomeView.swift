@@ -6,23 +6,44 @@ import SwiftUI
 /// a Lead can tap is a support call.
 struct HomeView: View {
     @Environment(Session.self) private var session
+    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showingAdmin = false
 
     private var role: ProjectRole? { session.headlineRole }
 
+    /// A tablet in landscape is nearly a thousand points wide. One column
+    /// of text across that is unreadable, and stretched cards look like a
+    /// phone app someone forgot to finish.
+    private var isWide: Bool { sizeClass == .regular }
+
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    identity
-                    jobs
-                    permissions
+                Group {
+                    if isWide {
+                        VStack(alignment: .leading, spacing: 28) {
+                            identity
+                            HStack(alignment: .top, spacing: 28) {
+                                jobs
+                                permissions
+                                    .frame(width: 380)
+                            }
+                        }
+                    } else {
+                        VStack(alignment: .leading, spacing: 24) {
+                            identity
+                            jobs
+                            permissions
+                        }
+                    }
                 }
-                .padding(.horizontal, FT.gutter)
-                .padding(.vertical, 12)
+                .frame(maxWidth: 1100)
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, isWide ? 32 : FT.gutter)
+                .padding(.vertical, isWide ? 24 : 12)
             }
             .background(Color(.systemGroupedBackground))
-            .navigationTitle("Field Task")
+            .navigationTitle("PM Controller")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if role?.isAdmin == true {
@@ -42,7 +63,7 @@ struct HomeView: View {
     private var identity: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(session.user?.name ?? "—")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(.system(size: isWide ? 36 : 28, weight: .bold, design: .rounded))
             if let role {
                 Text(role.label)
                     .font(.system(size: 17, weight: .medium))

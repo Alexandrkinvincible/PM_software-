@@ -71,6 +71,8 @@ struct ChangePasswordView: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, FT.gutter)
+        // A sign-in form stretched the width of a tablet is unreadable.
+        .frame(maxWidth: 460)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
     }

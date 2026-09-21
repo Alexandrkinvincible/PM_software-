@@ -1,8 +1,10 @@
 import SwiftUI
 
 @main
-struct FieldTaskApp: App {
-    @State private var session = Session()
+struct PMControllerApp: App {
+    @State private var session: Session = AppConfig.isPreview
+        ? .preview(persona: AppConfig.previewPersona)
+        : Session()
 
     var body: some Scene {
         WindowGroup {

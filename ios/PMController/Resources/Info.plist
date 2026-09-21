@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
   <key>CFBundleDisplayName</key>
-  <string>Field Task</string>
+  <string>PM Controller</string>
   <key>CFBundleShortVersionString</key>
   <string>$(MARKETING_VERSION)</string>
   <key>CFBundleVersion</key>
@@ -20,7 +20,18 @@
 
   <key>UILaunchScreen</key>
   <dict/>
-  <!-- Portrait only. This is used one-handed on a ladder. -->
+
+  <!-- A tablet is set down on a gang box or held in two hands, and the
+       board reads far better wide. It rotates freely. -->
+  <key>UISupportedInterfaceOrientations~ipad</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
+
+  <!-- A phone is held one-handed on a ladder. Portrait only. -->
   <key>UISupportedInterfaceOrientations</key>
   <array>
     <string>UIInterfaceOrientationPortrait</string>

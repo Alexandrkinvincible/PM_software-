@@ -6,18 +6,44 @@ is that log.
 
 ---
 
-## A. Platform
+## A. Name, standing, platform
+
+**A0 — The app is called PM Controller, and it is a product, not an Apex tool.**
+Decided by the owner. Bundle identifier `com.pmcontroller.app`. Everything Apex-branded is out:
+the demo company in `supabase/seed.sql` is now "Meridian Mechanical" and the demo client
+"Northside Construction Group", so nothing in the repo implies one contractor owns it. The repo
+directory name (`PM_software-`) is unchanged because renaming it breaks existing clone URLs; it
+is cosmetic and can be changed later from GitHub's settings if wanted.
 
 **A1 — Native iOS instead of a React PWA.**
 Decided by the owner. SPEC §9 is updated accordingly and the trade-off is written out there in
 full. Nothing below the client changed: the schema, the policies and all nine principles are
 untouched, because none of them depended on the client.
 
-**A2 — iOS 17 minimum, iPhone only, portrait only.**
-Assumed. iOS 17 buys `@Observable`, which removes a layer of boilerplate from every screen.
-Portrait-only follows from the spec's own "one-handed on a ladder". **Confirm which iPhones the
-Leads actually carry before this hardens** — if anyone is on an iPhone 8 or SE 1, iOS 17 excludes
-them and the target drops to 16.
+**A2 — iOS/iPadOS 17 minimum. Tablet first, phone second, laptop later.**
+Decided by the owner: start with the tablet. One binary covers both
+(`TARGETED_DEVICE_FAMILY = "1,2"`); the layouts diverge by size class rather than forking the
+app, so the phone version is mostly free when it is wanted. A tablet rotates freely; a phone
+stays portrait, which is the spec's own "one-handed on a ladder".
+
+iOS 17 buys `@Observable`, which removes a layer of boilerplate from every screen. **Confirm
+which devices the crews actually carry before this hardens** — an iPad 5 or an iPhone 8 would
+drop the target to 16.
+
+A laptop version later is not free: SwiftUI reaches the Mac through Catalyst or a separate Mac
+target, and neither is a checkbox. Worth deciding before Phase 7, since the progress page is the
+screen that most wants a big display.
+
+**A4 — Shipping does not require the $99 Apple Developer Program, and seeing it does not
+require a Mac.**
+The question was asked directly, so the answer is recorded. The paid program is needed only to
+put a build on *other people's* devices — TestFlight or the App Store. A free Apple ID builds,
+runs in the Simulator, and installs on a device you own yourself (re-signing every 7 days).
+
+The real prerequisite is a Mac. CI covers most of what that would otherwise be for: GitHub's
+macOS runners are free on public repositories, so `.github/workflows/ci.yml` compiles the app and
+publishes screenshots of it running on an iPad as an artifact of every run. What CI cannot give
+is live iteration — clicking through, changing something, seeing it immediately.
 
 **A3 — The Xcode project is generated, not committed.**
 `ios/project.yml` plus XcodeGen. A `.pbxproj` is unreviewable in a pull request and is the single
@@ -135,7 +161,28 @@ matters more than being able to run it twice.
 **D3 — Every test runs as `authenticated` with a real user id, never as the owner.**
 The owner bypasses RLS. A test suite run as the owner proves nothing at all.
 
-**D4 — "No rows matched" is treated as a refusal.**
+**D4 — Preview mode is a launch argument, and its data mirrors the seed.**
+The screenshot job needs the app to render real screens without a Supabase project behind it.
+`PreviewData.swift` supplies canned people that are deliberately the same shape as
+`supabase/seed.sql` — including the man who is Super on one job and Foreman on another — so a
+screenshot is a fair picture rather than a flattering one. Nothing in the UI can turn it on.
+
+Both flags carry an explicit value (`-PMControllerPreview YES -PMControllerPreviewRole lead`)
+because Foundation's argument domain reads `-flag` as a key whose value is the *next* argument.
+A bare `-PMControllerPreview` would have swallowed the role flag and the persona would have
+silently never arrived.
+
+**D5 — A missing Supabase key shows a setup screen instead of crashing.**
+The first cut called `fatalError` on a missing key. That is a hostile way to report a setup step
+somebody has not done, and it would have made the CI screenshot job impossible. The app now has
+an `unconfigured` state that says which file to fill in.
+
+**D6 — CI names no simulator device.**
+`scripts/pick-simulator.py` asks the runner what iPads and iOS runtimes it actually has. Naming a
+device in a workflow is a slow-motion breakage: Apple renames them every year and the job fails
+months later for a reason nobody remembers.
+
+**D4b — "No rows matched" is treated as a refusal.**
 That is the shape most RLS denials actually take on an UPDATE — the statement succeeds and
 changes nothing. Asserting only for raised errors would have passed four rules that were never
 enforced.
@@ -146,10 +193,11 @@ enforced.
 
 These are not decided. They are carried from SPEC §13 and need answers from PCM or from the owner.
 
-- The app's name — blocks the bundle identifier and the App Store listing.
 - Burdened rates: real figures, or placeholder multipliers.
 - Whether the GC's schedule can be imported or is entered by hand per area.
 - Whether PCM shares estimated hours per system or only total contract hours.
 - Whether Supervisor should have wider material visibility than Foreman (C5 assumes not).
-- Written sign-off from PCM ownership before any PCM data lives in an Apex-owned system.
-- Which iPhones the Leads carry (A2).
+- Written sign-off from PCM ownership before any PCM data lives in a system you own.
+- Which iPads and iPhones the crews carry (A2).
+- Whether a Mac is available for interactive development (A4).
+- Whether the laptop version is Catalyst or a separate Mac target (A2). Decide before Phase 7.

@@ -3,11 +3,11 @@
 # most common source of merge conflicts on an iOS team.
 #
 #   brew install xcodegen
-#   cd ios && xcodegen generate && open FieldTask.xcodeproj
+#   cd ios && xcodegen generate && open PMController.xcodeproj
 
-name: FieldTask
+name: PMController
 options:
-  bundleIdPrefix: com.apexmech
+  bundleIdPrefix: com.pmcontroller
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true
@@ -26,20 +26,27 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
 
 targets:
-  FieldTask:
+  PMController:
     type: application
     platform: iOS
     sources:
-      - path: FieldTask
+      - path: PMController
     dependencies:
       - package: Supabase
         product: Supabase
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.apexmech.fieldtask
-        INFOPLIST_FILE: FieldTask/Resources/Info.plist
+        PRODUCT_BUNDLE_IDENTIFIER: com.pmcontroller.app
+        # 1 = iPhone, 2 = iPad. One binary, two layouts, chosen by size
+        # class at runtime. Tablet is the design target; phone follows.
+        TARGETED_DEVICE_FAMILY: "1,2"
+        # No paid Apple Developer Program needed to build or to run in a
+        # Simulator. Signing is left automatic and is only exercised when
+        # installing on a physical device.
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_FILE: PMController/Resources/Info.plist
         # Secrets come from Config.xcconfig, which is gitignored.
         # Copy Config.example.xcconfig to Config.xcconfig to get started.
     configFiles:
-      Debug: FieldTask/Resources/Config.xcconfig
-      Release: FieldTask/Resources/Config.xcconfig
+      Debug: PMController/Resources/Config.xcconfig
+      Release: PMController/Resources/Config.xcconfig

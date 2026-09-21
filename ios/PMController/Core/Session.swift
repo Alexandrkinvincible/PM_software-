@@ -17,6 +17,8 @@ final class Session {
 
     enum State: Equatable {
         case loading
+        /// No Supabase project has been configured for this build.
+        case unconfigured
         case signedOut
         case mustChangePassword
         case ready
@@ -41,10 +43,64 @@ final class Session {
     }
 
     // -----------------------------------------------------------------
+    // Preview
+    // -----------------------------------------------------------------
+
+    /// A session that never touches the network, backed by PreviewData.
+    /// Used by SwiftUI previews and by the -PMControllerPreview launch
+    /// argument, which is how CI drives the app in a Simulator.
+    static func preview(
+        user: AppUser = PreviewData.superintendent,
+        memberships: [Membership] = PreviewData.superintendentMemberships,
+        state: State = .ready
+    ) -> Session {
+        let session = Session()
+        session.user = user
+        session.memberships = memberships
+        session.state = state
+        session.isPreview = true
+        return session
+    }
+
+    /// Named personas, so CI can photograph the app as each role.
+    /// The names match the ones in supabase/seed.sql.
+    static func preview(persona: String) -> Session {
+        switch persona {
+        case "lead":
+            return .preview(user: PreviewData.lead,
+                            memberships: PreviewData.leadMemberships)
+        case "manager":
+            return .preview(user: PreviewData.manager,
+                            memberships: PreviewData.managerMemberships)
+        case "first-login":
+            return .preview(user: PreviewData.lead,
+                            memberships: PreviewData.leadMemberships,
+                            state: .mustChangePassword)
+        case "signed-out":
+            return .preview(state: .signedOut)
+        default:
+            return .preview()
+        }
+    }
+
+    private(set) var isPreview = false
+
+    // -----------------------------------------------------------------
     // Lifecycle
     // -----------------------------------------------------------------
 
     func start() async {
+        // A preview session is already populated and has nowhere to call.
+        guard !isPreview else { return }
+
+        // An unconfigured build has no project to reach. RootView shows
+        // the setup instructions rather than a login form that can only
+        // ever fail.
+        guard AppConfig.isConfigured else {
+            state = .unconfigured
+            return
+        }
+
         for await change in supabase.auth.authStateChanges {
             switch change.event {
             case .initialSession, .signedIn, .tokenRefreshed, .userUpdated:

@@ -1,5 +1,5 @@
 -- =====================================================================
--- Migration 0002 — Row-level security.
+-- PM Controller — Migration 0002 — Row-level security.
 --
 -- SPEC principle 8: security lives in the database, not the UI.
 -- A Foreman querying the REST endpoint directly with his own JWT must

@@ -1,14 +1,17 @@
-# Field Task & Production Management
+# PM Controller
 
-Native iOS app for commercial mechanical crews. Makes the production number — man-hours burned
-vs. earned, by system and area, with rework separated from first-time work — a by-product of work
-the crew already does, rather than a separate reporting step.
+Native iPad and iPhone app for commercial mechanical crews. Makes the production number —
+man-hours burned vs. earned, by system and area, with rework separated from first-time work — a
+by-product of work the crew already does, rather than a separate reporting step.
 
-Owner: Alex Kulikov, Apex Plumbing & Mechanical. Pilot: Paulson Cheek Mechanical.
+Tablet first. Phone second. Laptop later.
+
+Owner: Alex Kulikov. An independent product, not an internal tool for any one contractor.
+Pilot customer: Paulson Cheek Mechanical.
 
 **[SPEC.md](SPEC.md) is authoritative.** Every phase reads it.
 [docs/DECISIONS.md](docs/DECISIONS.md) records what was assumed and why.
-[docs/Phase0_iOS_Build_Package.pdf](docs/Phase0_iOS_Build_Package.pdf) is the plan, milestones
+[docs/Phase0_Build_Package.pdf](docs/Phase0_Build_Package.pdf) is the plan, milestones
 and checklist.
 
 ---
@@ -42,7 +45,7 @@ against the database — as the role a phone actually holds, never as the owner.
 ```
 SPEC.md                              authoritative spec
 docs/DECISIONS.md                    assumptions and the six schema defects found
-docs/Phase0_iOS_Build_Package.pdf    plan, milestones, checklist
+docs/Phase0_Build_Package.pdf    plan, milestones, checklist
 
 supabase/
   migrations/0001_schema.sql         tables, enums, constraints, triggers
@@ -55,15 +58,18 @@ supabase/
 
 ios/
   project.yml                        XcodeGen manifest (the .xcodeproj is generated)
-  FieldTask/
+  PMController/
     App/                             entry point and root routing
-    Core/                            models mirroring the DB enums, session, client
+    Core/                            models mirroring the DB enums, session, client,
+                                     and the canned people used for previews
     Design/                          one button, one field, 56pt targets
     Features/Auth/                   login, forced first-login password change
     Features/Home/                   who you are, your jobs, what you may do
     Features/Admin/                  Manager-only: add a person, issue credentials
 
 scripts/db-test.sh                   rebuild a throwaway DB and run the suite
+scripts/pick-simulator.py            ask CI's runner which iPad it actually has
+.github/workflows/ci.yml             the three CI jobs
 ```
 
 ---
@@ -94,32 +100,64 @@ supabase functions deploy admin-create-user
 It is the only thing that touches the service-role key, and it re-checks that the caller is an
 active Manager before it does. The key never reaches the app.
 
-### 3. Build the app — needs a Mac
+### 3. Build the app
 
 ```bash
 brew install xcodegen
 cd ios
-cp FieldTask/Resources/Config.example.xcconfig FieldTask/Resources/Config.xcconfig
+cp PMController/Resources/Config.example.xcconfig PMController/Resources/Config.xcconfig
 #   fill in SUPABASE_URL and SUPABASE_ANON_KEY
 xcodegen generate
-open FieldTask.xcodeproj
+open PMController.xcodeproj
 ```
 
 The anon key is the only key that ships. Every query carries the signed-in user's JWT, so
 `0002_rls.sql` is what decides what comes back.
 
-> The Swift in this repo has **not been compiled** — there is no Swift toolchain on the machine it
-> was written on. Expect to fix small things on the first build. The SQL, by contrast, has been
-> applied and tested end to end.
+> The Swift in this repo has **not been compiled locally** — there is no Swift toolchain on the
+> machine it was written on. The `Build for iPad` CI job is what compiles it; check that it is
+> green before assuming it builds. The SQL, by contrast, has been applied and tested end to end.
 
 ### 4. Before you get much further
 
-- **Name the app.** It blocks the bundle identifier and the App Store listing.
-  `com.apexmech.fieldtask` is a placeholder.
-- **Start Apple Developer enrolment** ($99/yr, up to 48 hours) before it is on the critical path.
-- **Confirm which iPhones the Leads carry.** iOS 17 is assumed.
+- **Confirm which iPads and iPhones the crews carry.** iOS/iPadOS 17 is assumed.
+- **Start Apple Developer enrolment** ($99/yr) only when you are ready to put builds on other
+  people's devices. See below — you do not need it before then.
 
 ---
+
+## Seeing it work without paying for anything
+
+| What you want | What it costs |
+|---|---|
+| Compile it, run it in a Simulator | A Mac. No Apple account at all. |
+| Install it on an iPad **you own** | A Mac + a free Apple ID. Re-sign every 7 days. |
+| Put it on someone **else's** iPad (TestFlight) | $99/yr Apple Developer Program |
+| App Store | $99/yr |
+
+**And without a Mac:** every push runs CI on a free macOS runner, which compiles the app, boots
+an iPad simulator, launches it as each role, and uploads photographs of every screen. Open the
+run under **Actions → Screenshots on iPad → Artifacts** and download
+`PMController-iPad-screenshots`.
+
+What CI cannot replace is live iteration — clicking through and changing something on the spot.
+
+---
+
+## CI
+
+Three jobs on every pull request:
+
+| Job | Runner | What it proves |
+|---|---|---|
+| Row-level security | ubuntu | Both migrations applied to a real Postgres 16, then the 56 assertions |
+| Build for iPad | macOS | The Swift compiles |
+| Screenshots on iPad | macOS | The app runs, photographed as each role, uploaded as an artifact |
+
+The screenshot job runs the app in preview mode — a launch argument that loads the canned people
+in `ios/PMController/Core/PreviewData.swift` instead of calling Supabase. That data mirrors
+`supabase/seed.sql`, including the man who is Super on one job and Foreman on another, so a
+screenshot is a fair picture rather than a flattering one. Nothing in the UI can turn it on.
 
 ## Running the database tests
 

@@ -18,7 +18,7 @@ struct LoginView: View {
             Spacer(minLength: 0)
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Field Task")
+                Text("PM Controller")
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                 Text("Sign in with the email your manager set up.")
                     .font(.system(size: 16))
@@ -71,6 +71,8 @@ struct LoginView: View {
             Spacer(minLength: 0)
         }
         .padding(.horizontal, FT.gutter)
+        // A sign-in form stretched the width of a tablet is unreadable.
+        .frame(maxWidth: 460)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(.systemBackground))
         .onAppear { focus = .email }

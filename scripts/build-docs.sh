@@ -24,4 +24,4 @@ render() {
     --print-to-pdf="$ROOT/docs/$out" "file://$ROOT/docs/build/$src" 2>/dev/null
 }
 
-render phase0.html Phase0_iOS_Build_Package.pdf
+render phase0.html Phase0_Build_Package.pdf

@@ -8,7 +8,7 @@ xcuserdata/
 
 # Secrets. The anon key is public by design, but this file is the obvious
 # place someone will one day paste a service-role key by mistake.
-ios/FieldTask/Resources/Config.xcconfig
+ios/PMController/Resources/Config.xcconfig
 
 # Supabase local
 supabase/.branches/

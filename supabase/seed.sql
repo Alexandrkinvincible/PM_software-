@@ -29,7 +29,7 @@ on conflict (id) do nothing;
 
 -- ---- companies --------------------------------------------------------
 insert into companies (id, name, is_house, phone) values
-  ('00000000-0000-4000-8000-0000000000c1', 'Apex Plumbing & Mechanical', true,  '555-0100'),
+  ('00000000-0000-4000-8000-0000000000c1', 'Meridian Mechanical', true,  '555-0100'),
   ('00000000-0000-4000-8000-0000000000c2', 'Harbor Mechanical (sub)',    false, '555-0200')
 on conflict (id) do nothing;
 
@@ -50,8 +50,8 @@ on conflict (id) do nothing;
 
 -- ---- projects ---------------------------------------------------------
 insert into projects (id, name, number, client, contract_hours, contract_value) values
-  ('00000000-0000-4000-8000-0000000000f1', 'Welcome Building — Phase 2', '2601', 'Paulson Cheek Mechanical', 4200, 780000),
-  ('00000000-0000-4000-8000-0000000000f2', 'Riverside Clinic',           '2602', 'Paulson Cheek Mechanical', 1800, 310000)
+  ('00000000-0000-4000-8000-0000000000f1', 'Welcome Building — Phase 2', '2601', 'Northside Construction Group', 4200, 780000),
+  ('00000000-0000-4000-8000-0000000000f2', 'Riverside Clinic',           '2602', 'Northside Construction Group', 1800, 310000)
 on conflict (id) do nothing;
 
 -- ---- membership -------------------------------------------------------

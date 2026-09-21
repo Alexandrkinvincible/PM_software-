@@ -1,5 +1,5 @@
 -- =====================================================================
--- Field Task & Production Management App
+-- PM Controller
 -- Migration 0001 — Schema only (RLS in 0002, seed in seed.sql)
 -- Authoritative source: SPEC.md section 5.
 --

@@ -16,7 +16,7 @@ set -euo pipefail
 PGHOST="${PGHOST:-/tmp}"
 PGPORT="${PGPORT:-5439}"
 PGUSER="${PGUSER:-postgres}"
-DB="${DB:-fieldtask}"
+DB="${DB:-pmcontroller}"
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
 psql_() { psql -h "$PGHOST" -p "$PGPORT" -U "$PGUSER" "$@"; }

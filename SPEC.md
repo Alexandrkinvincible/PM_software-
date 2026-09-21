@@ -1,9 +1,11 @@
-# Field Task & Production Management App — SPEC
+# PM Controller — SPEC
 
-**Working name:** TBD. Repo, bundle identifier and App Store name all need updating once named.
-**Owner:** Alex Kulikov, Apex Plumbing & Mechanical.
+**Name:** PM Controller. Locked. Bundle identifier `com.pmcontroller.app`.
+**Owner:** Alex Kulikov.
+**Standing:** an independent product, not an internal tool for any one contractor. Apex
+Plumbing & Mechanical is where the problem was found, not the owner of the result.
 **Pilot customer:** Paulson Cheek Mechanical (PCM).
-**Client platform:** native iOS (SwiftUI). See §9.
+**Client platform:** native iOS / iPadOS (SwiftUI). **Tablet first.** See §9.
 
 This file is authoritative. Where an instruction conflicts with it, the conflict is raised
 rather than guessed at. Decisions land here as they are made; `docs/DECISIONS.md` records
@@ -183,7 +185,9 @@ principle above are unchanged, because they never depended on the client.
 
 - **Supabase** — Postgres, auth, row-level security, storage for photos and receipts.
   Unchanged from the original spec.
-- **SwiftUI, iOS 17+**, iPhone-first. Portrait only — this is used one-handed on a ladder.
+- **SwiftUI, iOS/iPadOS 17+**, one binary for both. **Tablet is the design target**; the phone
+  layout follows from it by size class. A tablet rotates freely; a phone stays portrait, because
+  that one is used one-handed on a ladder.
 - **supabase-swift** for auth, PostgREST and storage. The app ships the anon key only; every
   query carries the signed-in user's JWT, so the policies in `0002_rls.sql` are what decides.
 - **Supabase Edge Functions** for anything needing the service-role key. Today that is one
@@ -203,14 +207,21 @@ Why native rather than the PWA, in one line each:
 | Offline tolerance — a close-out with no signal must not be lost | Storage evicted under pressure | SwiftData, survives |
 | Crews shoot 12 MP images all day | JS-side compression | Hardware pipeline |
 
-The cost of the change is honest: no Android, App Store review on every release, and a Mac plus
-an Apple Developer account ($99/yr) are now required to ship. Accepted deliberately.
+The cost of the change is honest: no Android, and App Store review on every release. Accepted
+deliberately.
+
+**What it does not cost.** The $99/yr Apple Developer Program is needed only to put the app on
+*other people's* devices — TestFlight or the App Store. It is not needed to build, to run in a
+Simulator, or to install on a device you own yourself (a free Apple ID signs for 7 days at a
+time). The real prerequisite is a Mac, and even that is partly covered: CI builds the app on a
+macOS runner and publishes screenshots of it running on an iPad as an artifact of every run
+(§14), so the work is visible before anyone buys anything.
 
 ---
 
 ## 10. Build constraints
 
-- Phone-width layout first; iPad later, desktop never in v1.
+- **Tablet layout first**, phone second, laptop later. Desktop is out of scope for v1.
 - **Task close-out must take under 60 seconds.** Crew pre-selected, camera one tap, quantity one
   field. If it takes longer, it will not happen in the field.
 - **Offline tolerance** — a close-out on a job with no signal must not be lost.
@@ -250,12 +261,35 @@ Those are Phase 10+, only if the pilot earns them.
 
 ## 13. Open questions
 
-- App name. Blocks the bundle identifier and the App Store listing.
 - Burdened rates: real figures from PCM, or placeholder multipliers until shared.
 - Does the GC issue a schedule that can be imported, or are milestone dates entered by hand per area?
 - Will PCM share estimated hours per system, or only total contract hours?
 - Should Supervisor have wider material visibility than Foreman?
-- Written sign-off from PCM ownership before any PCM data lives in an Apex-owned system; data
+- Written sign-off from PCM ownership before any PCM data lives in a system you own; data
   ownership if the relationship ends.
-- Which iPhones do the Leads actually carry? Sets the deployment target; iOS 17 is the current
-  assumption.
+- Which iPads and iPhones do the crews actually carry? Sets the deployment target; iOS/iPadOS 17
+  is the current assumption.
+- Is there a Mac available for interactive development? CI covers building and screenshots, but
+  not live iteration.
+
+
+---
+
+## 14. Continuous integration
+
+Three jobs on every pull request (`.github/workflows/ci.yml`):
+
+| Job | Runner | What it proves |
+|---|---|---|
+| Row-level security | ubuntu | Applies both migrations to a real Postgres 16 and runs the 56 assertions. Principle 8 stops being a claim and becomes a gate. |
+| Build for iPad | macOS | The Swift compiles. Nobody needs a Mac for this to be true. |
+| Screenshots on iPad | macOS | Boots an iPad simulator, launches the app as each role, and uploads photographs of every screen as a downloadable artifact. |
+
+GitHub's macOS runners are free on public repositories, which is what makes the second and third
+jobs practical.
+
+The screenshot job runs the app in **preview mode** — a launch argument that loads the canned
+people in `ios/PMController/Core/PreviewData.swift` instead of calling Supabase. That data is
+deliberately the same shape as `supabase/seed.sql`, including the man who is Super on one job and
+Foreman on another, so a screenshot is a fair picture rather than a flattering one. Nothing in
+the UI can switch preview mode on.

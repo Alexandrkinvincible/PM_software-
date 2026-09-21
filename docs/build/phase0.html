@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Phase 0 — iOS Build Package</title>
+<title>PM Controller — Phase 0 Build Package</title>
 <style>
   @page { size: Letter; margin: 16mm 14mm 14mm 14mm; }
   :root {
@@ -77,23 +77,24 @@
 </head>
 <body>
 
-<h1>Field Task &amp; Production Management</h1>
-<p class="sub">Phase 0 — Action plan, milestones and build package · <b>iOS edition</b></p>
+<h1>PM Controller</h1>
+<p class="sub">Phase 0 — Action plan, milestones and build package · <b>tablet first</b></p>
 <div class="meta">
-  <span><b>Owner</b> Alex Kulikov · Apex Plumbing &amp; Mechanical</span>
+  <span><b>Owner</b> Alex Kulikov · independent product</span>
   <span><b>Pilot</b> Paulson Cheek Mechanical</span>
-  <span><b>Client</b> Native iOS (SwiftUI)</span>
+  <span><b>Client</b> iPad first · SwiftUI</span>
   <span><b>Backend</b> Supabase Postgres</span>
   <span><b>Issued</b> 20 September 2026</span>
 </div>
 
 <h2>1. What changed, and what did not</h2>
-<p>The original package specified a React mobile-first PWA. The client is now a <b>native iOS
-app</b>. Everything underneath is unchanged — the schema, the row-level security, and all nine
-non-negotiable principles never depended on the client.</p>
+<p>The original package specified a React mobile-first PWA. The client is now a <b>native
+iPad app</b>, with the phone layout following from the same binary. Everything underneath is
+unchanged — the schema, the row-level security, and all nine non-negotiable principles never
+depended on the client.</p>
 
 <table class="nobreak">
-  <tr><th style="width:38%">Requirement from the Phase 0 risk list</th><th style="width:31%">PWA on iOS</th><th style="width:31%">Native</th></tr>
+  <tr><th style="width:38%">Requirement from the Phase 0 risk list</th><th style="width:31%">PWA on iPad / iPhone</th><th style="width:31%">Native</th></tr>
   <tr><td>Rework notification must reach the Lead with the app closed</td><td>Fragile — needs Home Screen install first</td><td>APNs. Reliable.</td></tr>
   <tr><td>Close-out under 60 seconds, camera one tap</td><td>File-picker detour</td><td>Direct camera</td></tr>
   <tr><td>A close-out with no signal must not be lost</td><td>Browser storage evicted under pressure</td><td>SwiftData, survives</td></tr>
@@ -101,10 +102,25 @@ non-negotiable principles never depended on the client.</p>
 </table>
 
 <div class="box warn">
-<b>The cost, stated plainly.</b> No Android. App Store review on every release. A Mac and an
-Apple Developer account ($99/yr) are now required to ship. Distribution to the Leads during the
-pilot is TestFlight, not the public store — which is faster, but caps you at 100 internal testers
-and expires each build after 90 days.
+<b>The cost, stated plainly.</b> No Android, and App Store review on every release. Distribution
+to the Leads during the pilot is TestFlight, not the public store — faster, but capped at 100
+internal testers with each build expiring after 90 days.
+</div>
+
+<h3>What it does <i>not</i> cost — seeing it work before paying for anything</h3>
+<table class="nobreak">
+  <tr><th style="width:52%">What you want to do</th><th>What it actually costs</th></tr>
+  <tr><td>Compile it and run it in a Simulator</td><td>A Mac. <b>No Apple account at all.</b></td></tr>
+  <tr><td>Install it on an iPad <b>you own</b></td><td>A Mac and a <b>free</b> Apple ID. Re-sign every 7 days.</td></tr>
+  <tr><td>Put it on someone <b>else's</b> iPad (TestFlight)</td><td>$99/yr Apple Developer Program</td></tr>
+  <tr><td>App Store</td><td>$99/yr</td></tr>
+</table>
+<div class="box good">
+<b>And without a Mac at all.</b> GitHub's macOS runners are free on public repositories, so CI
+compiles the app, boots an iPad simulator, launches it as each role, and uploads photographs of
+every screen as an artifact of every run. You can look at the real app before buying a thing.
+What that cannot give you is live iteration — clicking through and changing something on the
+spot. <b>The genuine prerequisite is a Mac, not the $99.</b>
 </div>
 
 <h2>2. Status flow — unchanged, and locked in the database</h2>
@@ -155,7 +171,18 @@ and expires each build after 90 days.
 any client. Custom board columns sit on top and each maps to exactly one of these, so reporting
 reads core status and never a column name.</p>
 
-<h2>3. Phase plan and milestones</h2>
+<h2>3. Continuous integration</h2>
+<p>Three jobs on every pull request. The first is the one that matters most: SPEC principle 8
+says access control lives in the database, and this is what stops that claim quietly decaying as
+later phases add tables.</p>
+<table class="nobreak">
+  <tr><th style="width:26%">Job</th><th style="width:16%">Runner</th><th>What it proves</th></tr>
+  <tr><td>Row-level security</td><td>ubuntu</td><td>Both migrations applied to a real Postgres 16, then all 56 assertions. Non-zero exit on regression.</td></tr>
+  <tr><td>Build for iPad</td><td>macOS</td><td>The Swift compiles. Nobody needs a Mac for this to be true.</td></tr>
+  <tr><td>Screenshots on iPad</td><td>macOS</td><td>The app runs, photographed as each role, downloadable from the run.</td></tr>
+</table>
+
+<h2>4. Phase plan and milestones</h2>
 <table>
   <tr><th style="width:5%">#</th><th style="width:29%">Deliverable</th><th style="width:38%">Milestone — checked when</th><th style="width:28%">State</th></tr>
   <tr><td>0</td><td>Plan, model, flow, checklist</td><td>This package issued</td><td><span class="pill done">DONE</span></td></tr>
@@ -175,7 +202,7 @@ reads core status and never a column name.</p>
 
 <div class="pagebreak"></div>
 
-<h2>4. Phase 1 — what is built and proven</h2>
+<h2>5. Phase 1 — what is built and proven</h2>
 
 <div class="box good">
 <b>The Phase 1 milestone is a database claim, and it is now tested rather than asserted.</b>
@@ -210,20 +237,21 @@ when a rule regresses, so it gates CI.
   <tr><td>FIX-2</td><td><code>qty_needs_unit</code> ignored <code>qty_installed</code></td><td>Close-out records "340" with no unit</td></tr>
 </table>
 
-<h2>5. Reminders &amp; checklist</h2>
+<h2>6. Reminders &amp; checklist</h2>
 
 <h3>Before any more code — these block the build</h3>
 <ul class="chk">
-  <li><b>Name the app and lock it.</b> Blocks the bundle identifier, the App Store listing and the repo name. Currently <code>com.apexmech.fieldtask</code> as a placeholder.</li>
-  <li><b>Apple Developer Program enrolment</b> ($99/yr). Takes up to 48 hours; start it before it is on the critical path.</li>
-  <li><b>A Mac with Xcode 15 or later.</b> Nothing iOS ships without one.</li>
+  <li class="done"><b>Name the app and lock it.</b> PM Controller. Bundle identifier <code>com.pmcontroller.app</code>.</li>
+  <li class="done"><b>Separate it from Apex.</b> An independent product; no contractor's name anywhere in the repo or the demo data.</li>
+  <li><b>Answer: is there a Mac available?</b> This is the real gate, not the $99. Without one, CI screenshots are the only way to see the app.</li>
   <li><b>Create the Supabase project</b> (free tier is sufficient for the pilot) and apply <code>0001</code>, <code>0002</code>, then seed.</li>
-  <li><b>Confirm which iPhones the Leads actually carry.</b> iOS 17 is assumed; an iPhone 8 or SE 1 in the crew drops the target to 16.</li>
+  <li><b>Confirm which iPads and iPhones the crews actually carry.</b> iPadOS 17 is assumed; an iPad 5 drops the target to 16.</li>
+  <li><b>Apple Developer Program enrolment</b> ($99/yr) — only when you are ready to put builds on other people's devices. Not before.</li>
 </ul>
 
 <h3>Before the pilot goes live</h3>
 <ul class="chk">
-  <li>Written OK from PCM ownership before any PCM data lives in an Apex-owned system.</li>
+  <li>Written OK from PCM ownership before any PCM data lives in a system you own.</li>
   <li>Decide data ownership up front: who owns the records if the relationship ends.</li>
   <li>Decide burdened rates: real numbers, or placeholder multipliers until PCM shares them.</li>
   <li>Confirm the area / system list matches how PCM actually breaks out its estimates.</li>
@@ -243,17 +271,18 @@ when a rule regresses, so it gates CI.
   <li class="done">Never allow direct edit of hours; only start/end times and crew selection.</li>
   <li class="done">Row-level security enforced in the database, proven by test, not by the UI.</li>
   <li class="done">Metrics built as saved filters from the start, so drill-down is free rather than a rewrite.</li>
-  <li>Phone-width layout first, one-handed, portrait.</li>
+  <li class="done">CI gates the access rules, so a later phase cannot quietly break them.</li>
+  <li>Tablet layout first; the phone layout follows by size class from the same binary.</li>
   <li>Offline tolerance: a close-out with no signal must not be lost.</li>
   <li>Photo compression on upload — receipts must stay legible enough to audit against.</li>
   <li>Rework notification must reach the Lead with the app closed.</li>
 </ul>
 
-<h2>6. Risks still live</h2>
+<h2>7. Risks still live</h2>
 <table>
   <tr><th style="width:34%">Risk</th><th>Handling</th></tr>
   <tr><td>Leads don't close tasks in the field</td><td>Close-out under 60 seconds: crew already selected, camera one tap, quantity one field. Measured on a real phone in Phase 4, not assumed.</td></tr>
-  <tr><td>PCM says "that's just part of your job"</td><td>Built and owned under Apex, on Apex infrastructure, on your own time. PCM is the pilot customer, not the owner. In writing before go-live.</td></tr>
+  <tr><td>PCM says "that's just part of your job"</td><td>PM Controller is an independent product, built on your own time and infrastructure. PCM is the pilot customer, not the owner. In writing before go-live.</td></tr>
   <tr><td>Rework becomes a blame tool</td><td>Reasons describe the condition, not the person. Defect rate is never shown per individual — by system, area and phase only. This is built in, not policy.</td></tr>
   <tr><td>Scope creep into a full ERP</td><td>v1 ships with no scheduling, no invoicing, no payroll export, no Android.</td></tr>
   <tr><td>App Store review delays a fix</td><td>TestFlight for the pilot; expedited review exists for genuine blockers. Budget 24–48 hours for any store release.</td></tr>
@@ -262,8 +291,8 @@ when a rule regresses, so it gates CI.
 
 <div class="box">
 <b>Next artifact:</b> Phase 1 completion PDF — full chat interactions plus summary — issued once
-the iOS shell has been built on a Mac and a real Lead has signed in against a live Supabase
-project. The database half of Phase 1 is already proven and is recorded above.
+the app has been built green in CI and a real Lead has signed in against a live Supabase project.
+The database half of Phase 1 is already proven and is recorded above.
 </div>
 
 </body>
