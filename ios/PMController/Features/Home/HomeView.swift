@@ -5,7 +5,7 @@ import SwiftUI
 /// progress page are Phases 2 through 7 and are not stubbed here — a stub
 /// a Lead can tap is a support call.
 struct HomeView: View {
-    @EnvironmentObject private var session
+    @EnvironmentObject private var session: Session
     @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var showingAdmin = false
 

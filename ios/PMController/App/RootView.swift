@@ -6,7 +6,7 @@ import SwiftUI
 /// and nothing behind it to peek at — which is the point of issuing
 /// credentials rather than letting people register themselves.
 struct RootView: View {
-    @EnvironmentObject private var session
+    @EnvironmentObject private var session: Session
 
     var body: some View {
         switch session.state {
@@ -82,6 +82,7 @@ struct SetupNeededView: View {
 
 // #Preview is an iOS 17 macro. PreviewProvider is the portable
 // spelling and gives the same canvases in Xcode.
+@MainActor
 struct PMControllerPreviews: PreviewProvider {
     static var previews: some View {
         Group {

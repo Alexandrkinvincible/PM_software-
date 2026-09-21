@@ -103,8 +103,8 @@ final class Session: ObservableObject {
         for await change in supabase.auth.authStateChanges {
             switch change.event {
             case .initialSession, .signedIn, .tokenRefreshed, .userUpdated:
-                if change.session != nil {
-                    await loadProfile()
+                if let signedIn = change.session {
+                    await loadProfile(userId: signedIn.user.id)
                 } else {
                     state = .signedOut
                 }
@@ -141,8 +141,11 @@ final class Session: ObservableObject {
     // Profile
     // -----------------------------------------------------------------
 
-    func loadProfile() async {
-        guard let uid = supabase.auth.currentSession?.user.id else {
+    /// `userId` comes from the auth stream on sign-in. A refresh from the
+    /// UI has nobody to hand it one, so it falls back to whoever is
+    /// already loaded.
+    func loadProfile(userId: UUID? = nil) async {
+        guard let uid = userId ?? user?.id else {
             state = .signedOut
             return
         }
