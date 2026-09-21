@@ -85,6 +85,11 @@ final class Session {
                             state: .mustChangePassword)
         case "signed-out":
             return .preview(state: .signedOut)
+        case "super-board":
+            return .preview()
+        case "lead-board":
+            return .preview(user: PreviewData.lead,
+                            memberships: PreviewData.leadMemberships)
         default:
             return .preview()
         }

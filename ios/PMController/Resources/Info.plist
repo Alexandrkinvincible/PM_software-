@@ -39,6 +39,24 @@
   <key>NSCameraUsageDescription</key>
   <string>Photographs of completed work and receipts are attached to the task you close out.</string>
 
+  <!-- The type a dragged card carries. Declared so the system does not
+       have to guess, and so a card cannot be dropped into another app. -->
+  <key>UTExportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeIdentifier</key>
+      <string>com.apexmech.pmcontroller.ticket</string>
+      <key>UTTypeDescription</key>
+      <string>PM Controller ticket</string>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>public.data</string>
+      </array>
+      <key>UTTypeTagSpecification</key>
+      <dict/>
+    </dict>
+  </array>
+
   <key>UILaunchScreen</key>
   <dict/>
 

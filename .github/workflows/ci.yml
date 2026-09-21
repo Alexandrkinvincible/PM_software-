@@ -198,18 +198,22 @@ jobs:
           shoot 05-home-lead     -PMControllerPreview YES -PMControllerPreviewRole lead
           shoot 06-home-manager  -PMControllerPreview YES -PMControllerPreviewRole manager
 
+          # The board, as the two roles whose difference is the point.
+          shoot 07-board-super   -PMControllerPreview YES -PMControllerPreviewRole super-board
+          shoot 08-board-lead    -PMControllerPreview YES -PMControllerPreviewRole lead-board
+
       - name: Landscape as well
         env:
           DEVICE: ${{ steps.sim.outputs.device }}
         run: |
           set -euo pipefail
-          # A tablet spends most of its life on its side; the two-column
-          # layout only appears at that width.
+          # A tablet spends most of its life on its side, and the board is
+          # the screen that most needs the width.
           xcrun simctl terminate "$DEVICE" "$BUNDLE_ID" 2>/dev/null || true
           xcrun simctl launch "$DEVICE" "$BUNDLE_ID" \
-            -PMControllerPreview YES -PMControllerPreviewRole super
+            -PMControllerPreview YES -PMControllerPreviewRole super-board
           sleep 6
-          xcrun simctl io "$DEVICE" screenshot screenshots/07-home-super-landscape.png || true
+          xcrun simctl io "$DEVICE" screenshot screenshots/09-board-super-landscape.png || true
 
       - uses: actions/upload-artifact@v4
         with:

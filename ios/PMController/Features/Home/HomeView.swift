@@ -104,6 +104,9 @@ struct HomeView: View {
             } else {
                 ForEach(session.memberships) { membership in
                     if let project = membership.project {
+                        NavigationLink {
+                            BoardView(project: project)
+                        } label: {
                         HStack(alignment: .firstTextBaseline, spacing: 12) {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(project.name)
@@ -119,6 +122,9 @@ struct HomeView: View {
                                 .padding(.horizontal, 9).padding(.vertical, 4)
                                 .background(Capsule().fill(Color.ftAccent.opacity(0.16)))
                                 .foregroundStyle(Color.ftAccent)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundStyle(.tertiary)
                         }
                         .padding(14)
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -126,6 +132,8 @@ struct HomeView: View {
                             RoundedRectangle(cornerRadius: FT.radius, style: .continuous)
                                 .fill(Color(.secondarySystemGroupedBackground))
                         )
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             }

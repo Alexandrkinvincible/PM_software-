@@ -32,7 +32,13 @@ struct RootView: View {
             ChangePasswordView()
 
         case .ready:
-            HomeView()
+            if AppConfig.previewOpensBoard, let project = session.memberships.first?.project {
+                NavigationStack {
+                    BoardView(project: project, store: .preview())
+                }
+            } else {
+                HomeView()
+            }
         }
     }
 }
@@ -107,4 +113,19 @@ struct SetupNeededView: View {
 
 #Preview("Not connected") {
     SetupNeededView()
+}
+
+#Preview("Board — Super") {
+    NavigationStack {
+        BoardView(project: PreviewData.welcomeBuilding, store: .preview())
+    }
+    .environment(Session.preview())
+}
+
+#Preview("Board — Lead") {
+    NavigationStack {
+        BoardView(project: PreviewData.welcomeBuilding, store: .preview())
+    }
+    .environment(Session.preview(user: PreviewData.lead,
+                                 memberships: PreviewData.leadMemberships))
 }

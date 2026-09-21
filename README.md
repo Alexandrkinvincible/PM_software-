@@ -21,8 +21,9 @@ and checklist.
 | Phase | State |
 |---|---|
 | 0 — Plan, model, flow, checklist | **Issued** |
-| 1 — Schema · auth · admin setup · row-level security | **Database gate met** — 56/56 assertions green. iOS shell written; needs a Mac to build. |
-| 2 onwards | Not started |
+| 1 — Schema · auth · admin setup · row-level security | **Complete** — merged in PR #1. |
+| 2 — Task board, columns, role-gated transitions | **Database gate met** — 69/69 assertions. App built, in review. |
+| 3 onwards | Not started |
 
 The Phase 1 milestone is *"an admin creates a Lead by email, and that Lead sees only his project
 and cannot read the receipts tables at all."* That is a claim about the database, so it is tested
@@ -35,7 +36,7 @@ against the database — as the role a phone actually holds, never as the owner.
 ```
  passed | failed |                verdict
 --------+--------+---------------------------------------
-     56 |      0 | ALL GREEN — Phase 1 database gate met
+     69 |      0 | ALL GREEN — Phase 1 and Phase 2 database gates met
 ```
 
 ---
@@ -64,6 +65,7 @@ ios/
                                      and the canned people used for previews
     Design/                          one button, one field, 56pt targets
     Features/Auth/                   login, forced first-login password change
+    Features/Board/                  the board, cards, detail, move sheet, new ticket
     Features/Home/                   who you are, your jobs, what you may do
     Features/Admin/                  Manager-only: add a person, issue credentials
 

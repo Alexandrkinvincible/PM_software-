@@ -252,7 +252,7 @@ Those are Phase 10+, only if the pilot earns them.
 |---|---|---|
 | 0 | Plan, model, flow, checklist | Package issued |
 | 1 | Schema + admin user setup + auth + RLS | Admin creates a Lead by email; that Lead sees only his project and no material page |
-| 2 | Task board, columns, role-gated transitions | A Lead cannot move a task to Accomplished |
+| 2 | Task board, columns, role-gated transitions | A Lead cannot move a task to Accomplished — **database gate met; app in review** |
 | 3 | Time capture — crew selection, per-person rows | One session with 3 crew writes 3 rows |
 | 4 | Photos, description, quantity at close-out | Task closes with a photo from a phone in the field |
 | 5 | Review gate + Rework column + push notifications | Rejected task lands in Rework and the Lead's phone buzzes |
@@ -274,6 +274,7 @@ Those are Phase 10+, only if the pilot earns them.
 - Should Supervisor have wider material visibility than Foreman?
 - Written sign-off from PCM ownership before any PCM data lives in a system you own; data
   ownership if the relationship ends.
+- Are area and system free text, or a fixed list per project? Free text for now; a fixed list needs PCM's estimate breakdown to define.
 - Which iPads and iPhones do the crews actually carry? The floor is iOS/iPadOS 18. Anything
   that cannot reach 18 is out, deliberately.
 - Does Apex control the `apexmech.com` domain? The bundle identifier `com.apexmech.pmcontroller`

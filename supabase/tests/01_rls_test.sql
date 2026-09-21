@@ -14,8 +14,8 @@
 -- The milestone: an admin creates a Lead by email, and that Lead sees
 -- only his project and cannot read the receipts tables at all.
 --
--- This suite signs work off, approves a change order and deactivates a
--- user. It is deliberately NOT idempotent — it must run against a freshly
+-- This suite signs work off, approves a change order, moves cards across
+-- board columns and deactivates a user. It is deliberately NOT idempotent — it must run against a freshly
 -- seeded database, which is what scripts/db-test.sh guarantees.
 --
 -- Run:  ./scripts/db-test.sh
@@ -353,6 +353,103 @@ select t_allowed('people', 'Deactivation is the only path',
   'update users set is_active = false where id = ' || quote_literal(:lead2));
 
 -- =====================================================================
+-- I. The board (Phase 2)
+--
+--    The board's promise is that a column is cosmetic and the core
+--    status underneath is not. These assert that promise from the
+--    database side, where it is actually kept.
+--
+--    NOTE: this section deliberately uses `lead` and a ticket of its
+--    own. Section H deactivates `lead2`, and an inactive user matches
+--    no policy at all — every statement would touch zero rows, which
+--    reads as a pass for anything asserting a refusal. A test that
+--    passes because nothing happened is worse than no test.
+-- =====================================================================
+
+\set col_inprog  '''00000000-0000-4000-8000-0000000000b1'''
+\set col_gc      '''00000000-0000-4000-8000-0000000000b2'''
+\set col_review  '''00000000-0000-4000-8000-0000000000b3'''
+\set task_board  '''00000000-0000-4000-8000-0000000000e9'''
+
+reset role;
+select app_logout();
+
+-- Two custom columns inside one core status, and one in another, named
+-- so the tests below read without consulting the seed.
+insert into board_columns (id, project_id, name, sort_order, core_status,
+                           blocked_flag, blocked_reason_type, is_system)
+values
+  (:col_inprog, :proj_wb, 'Rough-in bay',       210, 'in_progress', false, null,  false),
+  (:col_gc,     :proj_wb, 'Held for GC',        220, 'in_progress', true,  'gc',  false),
+  (:col_review, :proj_wb, 'Walked, not signed', 230, 'review',      false, null,  false);
+
+-- A ticket of this section's own, assigned to an active Lead.
+insert into tasks (id, project_id, area, system, title, est_hours,
+                   status, board_column_id, created_by, assigned_lead)
+values (:task_board, :proj_wb, 'Area C', 'domestic water',
+        'Board fixture — riser 3', 20,
+        'in_progress', :col_inprog, :super, :lead);
+
+set role authenticated;
+
+select app_login(:lead);
+select t_eq('board', 'A Lead sees every column on his job',
+  'select count(*)::text from board_columns where project_id = ' || quote_literal(:proj_wb), '13');
+
+select t_allowed('board', 'A Lead moves his card between two columns of the SAME core status',
+  'update tasks set board_column_id = ' || quote_literal(:col_gc) ||
+  ' where id = ' || quote_literal(:task_board));
+select t_eq('board', 'the card actually moved',
+  'select board_column_id::text from tasks where id = ' || quote_literal(:task_board),
+  '00000000-0000-4000-8000-0000000000b2');
+select t_eq('board', 'and its core status did not change',
+  'select status::text from tasks where id = ' || quote_literal(:task_board), 'in_progress');
+
+-- The trigger is what makes a column cosmetic: the pair must agree.
+select t_denied('board', 'A column cannot be set without the status that matches it',
+  'update tasks set board_column_id = ' || quote_literal(:col_review) ||
+  ' where id = ' || quote_literal(:task_board));
+select t_allowed('board', 'The same move succeeds when status travels with it',
+  'update tasks set board_column_id = ' || quote_literal(:col_review) ||
+  ', status = ''review'' where id = ' || quote_literal(:task_board));
+
+-- Cross-project protection is two separate things, and conflating them
+-- hides a hole. First: a Lead cannot even NAME another project's column,
+-- because row security does not show it to him — so a subquery for one
+-- yields null, and a null column is simply "not placed yet".
+select t_eq('board', 'A Lead cannot see another project''s columns at all',
+  'select count(*)::text from board_columns where project_id = ' || quote_literal(:proj_rc), '0');
+
+-- Second: for somebody who CAN see both projects — a Manager — the
+-- trigger is what refuses the mismatch. That is the layer that would
+-- matter if a policy were ever loosened.
+select app_login(:manager);
+select t_eq('board', 'A Manager can see both projects'' columns',
+  'select count(*)::text from board_columns where project_id = ' || quote_literal(:proj_rc), '6');
+select t_denied('board', 'but cannot drop a card on the other project''s column',
+  'update tasks set board_column_id = (select id from board_columns where project_id = ' ||
+  quote_literal(:proj_rc) || ' and name = ''Open'') where id = ' || quote_literal(:task_board));
+select app_login(:lead);
+
+-- The Phase 2 milestone, stated the way the board states it.
+select t_denied('board', 'MILESTONE — a Lead cannot move a card into Accomplished',
+  'update tasks set status = ''accomplished'', accomplished_at = now(), accomplished_by = ' ||
+  quote_literal(:lead) || ', board_column_id = (select id from board_columns where project_id = ' ||
+  quote_literal(:proj_wb) || ' and name = ''Accomplished'') where id = ' || quote_literal(:task_board));
+select t_eq('board', 'and the card is still sitting in Review',
+  'select status::text from tasks where id = ' || quote_literal(:task_board), 'review');
+
+select app_login(:super);
+select t_allowed('board', 'A Super can make that same move',
+  'update tasks set status = ''accomplished'', accomplished_at = now(), accomplished_by = ' ||
+  quote_literal(:super) || ', board_column_id = (select id from board_columns where project_id = ' ||
+  quote_literal(:proj_wb) || ' and name = ''Accomplished'') where id = ' || quote_literal(:task_board));
+
+select t_eq('board', 'the move wrote its own audit row',
+  'select to_status::text from task_events where task_id = ' || quote_literal(:task_board) ||
+  ' order by created_at desc limit 1', 'accomplished');
+
+-- =====================================================================
 -- Report
 -- =====================================================================
 
@@ -372,7 +469,7 @@ select lpad(n::text, 3) as "#",
 select count(*) filter (where ok)        as passed,
        count(*) filter (where not ok)    as failed,
        case when count(*) filter (where not ok) = 0
-            then 'ALL GREEN — Phase 1 database gate met'
+            then 'ALL GREEN — Phase 1 and Phase 2 database gates met'
             else 'FAILED' end            as verdict
   from results;
 

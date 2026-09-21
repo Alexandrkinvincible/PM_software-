@@ -250,6 +250,55 @@ enforced.
 
 ---
 
+## F. Phase 2 — the board
+
+**F1 — The work item is a `Ticket`, not a `Task`.**
+Swift Concurrency owns `Task`, and a model type that shadows it makes every `Task { }` in the
+file ambiguous. SPEC already calls them tickets in several places, so the domain language and the
+compiler agree. The database table stays `tasks`; only the Swift type is renamed.
+
+**F2 — Columns are grouped under the six core statuses, not shown flat.**
+Ten flat columns on a tablet is a scroll with no landmarks. Grouping makes the locked structure
+visible, which is the one fact the whole model rests on — a Super should be able to see that
+"Waiting on GC" is still In Progress without being told.
+
+**F3 — A move names a column; the status is derived from it, never the reverse.**
+`BoardStore.move` sends `status` and `board_column_id` in one update, taking the status from the
+target column. The `enforce_column_status_match` trigger refuses any mismatch from the other
+side, so the two cannot drift.
+
+**F4 — Moves are optimistic, with a visible rollback.**
+A board that pauses on every drag feels broken on site Wi-Fi. The card lands immediately; a
+refusal restores it and raises an alert saying why. The database's answer is always believed over
+the app's local guess.
+
+**F5 — No dragging on a phone.**
+The phone gets a tap-to-move sheet. Dragging a card across ten columns one-handed on a ladder is
+a bad idea. The sheet is also better on a tablet with gloves, and it does something dragging
+cannot: it lists the moves that are closed to you and says why, so a Lead learns the rule once
+instead of discovering it as a failed drag.
+
+**F6 — Area and system stay free text for now.**
+SPEC's own open question is whether they should be a fixed list per project, and answering it
+needs PCM's estimate breakdown. Free text is the reversible choice; a fixed list can be imposed
+later, but wrong fixed values are expensive to unpick.
+
+**F7 — Custom columns render, but nothing creates or edits them.**
+Column management is Phase 6a. The seed and the tests exercise custom columns because the schema
+already supports them, and rendering them now is what proves the grouping works.
+
+**F8 — The board tests use an active Lead and a ticket of their own.**
+The first cut reused `lead2`, who section H deactivates. An inactive user matches no policy at
+all, so every statement touched zero rows — which reads as a pass for anything asserting a
+refusal. Four assertions were passing for the wrong reason. A test that passes because nothing
+happened is worse than no test.
+
+**F9 — Cross-project protection is asserted as two separate things.**
+A Lead cannot name another project's column because row security does not show it to him, so a
+subquery yields null and a null column simply means "not placed yet". The trigger is a second,
+independent layer, and it is now asserted as a Manager — somebody who can see both projects — so
+the layer that would matter if a policy were ever loosened is actually covered.
+
 ## E. Still open
 
 These are not decided. They are carried from SPEC §13 and need answers from PCM or from the owner.
