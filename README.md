@@ -6,7 +6,7 @@ by-product of work the crew already does, rather than a separate reporting step.
 
 Tablet first. Phone second. Laptop later.
 
-Owned by Apex Plumbing & Mechanical — see [LICENSE](LICENSE). Pilot customer: Paulson Cheek
+Owned by Apex Plumbing and Mechanical Services SC — see [LICENSE](LICENSE). Pilot customer: Paulson Cheek
 Mechanical. Apex owns the software; a customer owns its own records.
 
 **[SPEC.md](SPEC.md) is authoritative.** Every phase reads it.

@@ -8,7 +8,7 @@ is that log.
 
 ## A. Name, standing, platform
 
-**A0 — The app is called PM Controller and Apex Plumbing & Mechanical owns it.**
+**A0 — The app is called PM Controller and Apex Plumbing and Mechanical Services SC owns it.**
 Both decided by the owner. The ownership position was reversed mid-build: it was first separated
 from Apex, then reinstated. The current position is the one recorded here, and it matches the
 original Phase 0 package ("build and own it under Apex").

@@ -1,7 +1,7 @@
 # PM Controller — SPEC
 
-**Name:** PM Controller. Locked. Bundle identifier `com.pmcontroller.app`.
-**Owner:** Apex Plumbing & Mechanical. Alex Kulikov, principal.
+**Name:** PM Controller. Locked. Bundle identifier `com.apexmech.pmcontroller`.
+**Owner:** Apex Plumbing and Mechanical Services SC. Alex Kulikov, principal.
 **Standing:** Apex owns the software outright — see `LICENSE`, and the copyright header on
 every source file. PCM is a pilot customer, not a co-owner. Apex owns the product; a customer
 owns its own records. That split belongs in writing before any customer data is entered.
