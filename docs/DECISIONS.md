@@ -205,10 +205,24 @@ The first cut called `fatalError` on a missing key. That is a hostile way to rep
 somebody has not done, and it would have made the CI screenshot job impossible. The app now has
 an `unconfigured` state that says which file to fill in.
 
-**D6 — CI names no simulator device.**
-`scripts/pick-simulator.py` asks the runner what iPads and iOS runtimes it actually has. Naming a
-device in a workflow is a slow-motion breakage: Apple renames them every year and the job fails
-months later for a reason nobody remembers.
+**D6 — CI names no simulator device, and pairs it against the runtime that supports it.**
+`scripts/pick-simulator.py` asks the runner what it actually has. Naming a device in a workflow
+is a slow-motion breakage: Apple renames them every year and the job fails months later for a
+reason nobody remembers.
+
+The first cut of this still failed, and the reason is worth keeping. Having a device type and
+having a runtime does **not** mean the two go together. The runner carries both an iPad Pro
+10.5-inch (2017) and iOS 26.5, and the script — ranking iPads by name, preferring "Pro" — picked
+exactly that pair:
+
+    com.apple.CoreSimulator.SimDeviceType.iPad-Pro--10-5-inch- … iOS-26-5
+    An error was encountered processing the command (code=403): Incompatible device
+
+Each runtime publishes `supportedDeviceTypes`, so the script now reads the runtime first and
+chooses only from what that runtime will actually run — widest screen first, since the
+two-column tablet layout only appears at that width. It prints several candidates and the
+workflow falls through to the next if creating one fails, so a surprise we cannot see from here
+costs a retry rather than a red build.
 
 **D4b — "No rows matched" is treated as a refusal.**
 That is the shape most RLS denials actually take on an UPDATE — the statement succeeds and

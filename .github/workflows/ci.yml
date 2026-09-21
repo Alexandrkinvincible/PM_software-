@@ -140,12 +140,27 @@ jobs:
         id: sim
         run: |
           set -euo pipefail
-          # Pick whatever iPad and iOS runtime this runner image actually
-          # has, rather than naming a device that may be renamed next month.
-          python3 scripts/pick-simulator.py > sim.txt
-          cat sim.txt
-          read -r TYPE RUNTIME < sim.txt
-          DEVICE=$(xcrun simctl create pmcontroller-ipad "$TYPE" "$RUNTIME")
+          # Ask the runner which iPad and iOS runtime it actually has,
+          # rather than naming a device that may be renamed next month.
+          # The script prints several candidates; take the first that will
+          # actually pair. A device type and a runtime both being present
+          # does NOT mean they are compatible — a 2017 iPad Pro and iOS 26
+          # are both on the runner and pairing them fails outright.
+          python3 scripts/pick-simulator.py > candidates.txt
+          echo "candidates:"; cat candidates.txt
+          DEVICE=""
+          while read -r TYPE RUNTIME; do
+            if DEVICE=$(xcrun simctl create pmcontroller-ipad "$TYPE" "$RUNTIME" 2>/dev/null); then
+              echo "created on $TYPE / $RUNTIME"
+              break
+            fi
+            echo "  incompatible: $TYPE + $RUNTIME"
+            DEVICE=""
+          done < candidates.txt
+          if [ -z "$DEVICE" ]; then
+            echo "::error::No iPad simulator on this runner could be created."
+            exit 1
+          fi
           echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
           xcrun simctl boot "$DEVICE"
           xcrun simctl bootstatus "$DEVICE" -b
