@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Supplying INFOPLIST_FILE means Xcode uses this file as written and
+       synthesises nothing. The six keys below are the ones it would
+       otherwise have added; without CFBundleIdentifier the built .app
+       cannot be installed at all ("Missing bundle ID"). -->
+  <key>CFBundleIdentifier</key>
+  <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+  <key>CFBundleExecutable</key>
+  <string>$(EXECUTABLE_NAME)</string>
+  <key>CFBundleName</key>
+  <string>$(PRODUCT_NAME)</string>
+  <key>CFBundlePackageType</key>
+  <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>$(DEVELOPMENT_LANGUAGE)</string>
+
+  <key>CFBundleDisplayName</key>
+  <string>PM Controller</string>
+  <key>CFBundleShortVersionString</key>
+  <string>$(MARKETING_VERSION)</string>
+  <key>CFBundleVersion</key>
+  <string>$(CURRENT_PROJECT_VERSION)</string>
+
+  <key>NSHumanReadableCopyright</key>
+  <string>Copyright © 2026 Apex Plumbing and Mechanical Services SC. All rights reserved.</string>
+
+  <key>SUPABASE_URL</key>
+  <string>$(SUPABASE_URL)</string>
+  <key>SUPABASE_ANON_KEY</key>
+  <string>$(SUPABASE_ANON_KEY)</string>
+
+  <!-- Phase 4 uses the camera directly; the string is here from the start
+       so the first camera build is not blocked on an App Store rejection. -->
+  <key>NSCameraUsageDescription</key>
+  <string>Photographs of completed work and receipts are attached to the task you close out.</string>
+
+  <key>UILaunchScreen</key>
+  <dict/>
+
+  <!-- A tablet is set down on a gang box or held in two hands, and the
+       board reads far better wide. It rotates freely. -->
+  <key>UISupportedInterfaceOrientations~ipad</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
+
+  <!-- A phone is held one-handed on a ladder. Portrait only. -->
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+  </array>
+</dict>
+</plist>

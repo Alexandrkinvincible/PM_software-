@@ -1,0 +1,35 @@
+PM Controller
+Copyright © 2026 Apex Plumbing and Mechanical Services SC. All rights reserved.
+
+PROPRIETARY AND CONFIDENTIAL
+
+This software and its source code, database schema, documentation and all
+associated materials are the exclusive property of Apex Plumbing and
+Mechanical Services SC ("Apex").
+
+No licence, express or implied, is granted by the publication of this
+repository. No person or organisation may copy, modify, merge, publish,
+distribute, sublicense, sell, or create derivative works from any part of
+it without the prior written permission of Apex.
+
+Pilot and evaluation use
+------------------------
+Where Apex grants an organisation access to a running instance for pilot
+or evaluation purposes, that access is a revocable licence to USE the
+service only. It conveys no ownership of, and no licence to, the software
+itself.
+
+Customer data
+-------------
+Data entered by a pilot or customer organisation — its projects, tasks,
+hours, photographs and receipts — belongs to that organisation, not to
+Apex. Apex owns the software; the customer owns its records. Nothing in
+this notice claims otherwise, and the two should be separated in writing
+before any customer data is entered.
+
+Third-party components
+----------------------
+This project depends on third-party open-source software, including
+supabase-swift and PostgreSQL, each governed by its own licence. Those
+licences are unaffected by this notice and continue to apply to those
+components.

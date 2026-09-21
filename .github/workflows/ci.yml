@@ -1,0 +1,218 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ===================================================================
+  # The Phase 1 gate. SPEC principle 8 says access control lives in the
+  # database; this is what stops that claim quietly decaying as later
+  # phases add tables. It runs the same script a contributor runs.
+  # ===================================================================
+  database:
+    name: Row-level security
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends postgresql-client
+          psql --version
+
+      - name: Apply migrations and run the suite
+        env:
+          PGHOST: localhost
+          PGPORT: "5432"
+          PGUSER: postgres
+        run: ./scripts/db-test.sh
+
+  # ===================================================================
+  # Compiles the app for an iPad simulator. GitHub's macOS runners are
+  # free on public repositories, so the Swift is verified without anyone
+  # needing a Mac of their own.
+  # ===================================================================
+  ios-build:
+    name: Build for iPad
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate the project
+        working-directory: ios
+        run: |
+          # Config.xcconfig is gitignored. CI builds unconfigured on
+          # purpose: the app must compile and launch without a Supabase
+          # project, and show the setup screen rather than crash.
+          cp PMController/Resources/Config.example.xcconfig \
+             PMController/Resources/Config.xcconfig
+          xcodegen generate
+
+      - name: Check the deployment target has not drifted up
+        run: |
+          set -euo pipefail
+          # The compiler is the real guard: with an 18.0 floor it refuses
+          # any newer API outright. This only catches someone raising the
+          # floor itself, which the compiler would happily accept.
+          FLOOR=$(grep -A4 'deploymentTarget:' ios/project.yml \
+                  | grep -o 'iOS: "[0-9.]*"' | grep -o '[0-9.]*')
+          echo "deployment target: iOS $FLOOR"
+          if [ "$FLOOR" != "18.0" ]; then
+            echo "::error::Deployment target moved to $FLOOR; the agreed floor is 18.0."
+            exit 1
+          fi
+
+      - name: Build
+        working-directory: ios
+        run: |
+          set -o pipefail
+          # A generic destination, so CI does not break the day GitHub
+          # renames a simulator device.
+          xcodebuild build \
+            -project PMController.xcodeproj \
+            -scheme PMController \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            -quiet \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package the app
+        working-directory: ios
+        run: |
+          # Tarred, because upload-artifact drops the executable bit and
+          # simctl will not install a bundle it cannot run.
+          cd build/Build/Products/Debug-iphonesimulator
+          tar czf "$GITHUB_WORKSPACE/PMController-app.tgz" PMController.app
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PMController-iPad-app
+          path: PMController-app.tgz
+          if-no-files-found: error
+
+  # ===================================================================
+  # Boots an iPad, launches the app as each role and photographs every
+  # screen. The images land as a downloadable artifact on every run —
+  # which is how you look at the app without owning a Mac.
+  # ===================================================================
+  ios-screenshots:
+    name: Screenshots on iPad
+    runs-on: macos-latest
+    needs: ios-build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: PMController-iPad-app
+
+      - name: Unpack
+        run: tar xzf PMController-app.tgz
+
+      - name: Boot an iPad
+        id: sim
+        run: |
+          set -euo pipefail
+          # Ask the runner which iPad and iOS runtime it actually has,
+          # rather than naming a device that may be renamed next month.
+          # The script prints several candidates; take the first that will
+          # actually pair. A device type and a runtime both being present
+          # does NOT mean they are compatible — a 2017 iPad Pro and iOS 26
+          # are both on the runner and pairing them fails outright.
+          python3 scripts/pick-simulator.py > candidates.txt
+          echo "candidates:"; cat candidates.txt
+          DEVICE=""
+          while read -r TYPE RUNTIME; do
+            if DEVICE=$(xcrun simctl create pmcontroller-ipad "$TYPE" "$RUNTIME" 2>/dev/null); then
+              echo "created on $TYPE / $RUNTIME"
+              break
+            fi
+            echo "  incompatible: $TYPE + $RUNTIME"
+            DEVICE=""
+          done < candidates.txt
+          if [ -z "$DEVICE" ]; then
+            echo "::error::No iPad simulator on this runner could be created."
+            exit 1
+          fi
+          echo "device=$DEVICE" >> "$GITHUB_OUTPUT"
+          xcrun simctl boot "$DEVICE"
+          xcrun simctl bootstatus "$DEVICE" -b
+
+      - name: Photograph each screen
+        env:
+          DEVICE: ${{ steps.sim.outputs.device }}
+        run: |
+          set -euo pipefail
+          mkdir -p screenshots
+          xcrun simctl install "$DEVICE" PMController.app
+          # Read the identifier from the bundle that was actually built
+          # rather than repeating it here, so a rename cannot break this.
+          BUNDLE_ID=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" \
+                      PMController.app/Info.plist)
+          echo "bundle id: $BUNDLE_ID"
+          echo "BUNDLE_ID=$BUNDLE_ID" >> "$GITHUB_ENV"
+
+          shoot() {
+            local name="$1"; shift
+            xcrun simctl terminate "$DEVICE" "$BUNDLE_ID" 2>/dev/null || true
+            xcrun simctl launch "$DEVICE" "$BUNDLE_ID" "$@"
+            sleep 6   # let SwiftUI lay out before the shutter
+            xcrun simctl io "$DEVICE" screenshot "screenshots/$name.png"
+            echo "captured $name"
+          }
+
+          # No Supabase project configured — the setup screen.
+          shoot 01-not-connected
+
+          # The seeded people, each seeing what their role allows.
+          shoot 02-signed-out    -PMControllerPreview YES -PMControllerPreviewRole signed-out
+          shoot 03-first-login   -PMControllerPreview YES -PMControllerPreviewRole first-login
+          shoot 04-home-super    -PMControllerPreview YES -PMControllerPreviewRole super
+          shoot 05-home-lead     -PMControllerPreview YES -PMControllerPreviewRole lead
+          shoot 06-home-manager  -PMControllerPreview YES -PMControllerPreviewRole manager
+
+      - name: Landscape as well
+        env:
+          DEVICE: ${{ steps.sim.outputs.device }}
+        run: |
+          set -euo pipefail
+          # A tablet spends most of its life on its side; the two-column
+          # layout only appears at that width.
+          xcrun simctl terminate "$DEVICE" "$BUNDLE_ID" 2>/dev/null || true
+          xcrun simctl launch "$DEVICE" "$BUNDLE_ID" \
+            -PMControllerPreview YES -PMControllerPreviewRole super
+          sleep 6
+          xcrun simctl io "$DEVICE" screenshot screenshots/07-home-super-landscape.png || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PMController-iPad-screenshots
+          path: screenshots/
+          if-no-files-found: error

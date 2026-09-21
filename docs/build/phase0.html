@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PM Controller — Phase 0 Build Package</title>
+<style>
+  @page { size: Letter; margin: 16mm 14mm 14mm 14mm; }
+  :root {
+    --ink:#16181d; --muted:#5b6068; --line:#dcdbd6; --paper:#faf9f5;
+    --accent:#b8563a; --ok:#3f7f4a; --warn:#b8862a; --bad:#a9402f;
+    --blue:#3d6ea8; --green:#2a7a67;
+  }
+  * { box-sizing:border-box; }
+  body {
+    font-family:"Charter","Georgia",serif; color:var(--ink);
+    font-size:10.2pt; line-height:1.5; margin:0; background:#fff;
+  }
+  h1 { font-size:26pt; margin:0 0 2px; letter-spacing:-0.5px; line-height:1.1; }
+  h2 {
+    font-size:13pt; margin:22px 0 9px; padding-bottom:5px;
+    border-bottom:2px solid var(--ink); letter-spacing:-0.2px;
+  }
+  h3 { font-size:10.8pt; margin:15px 0 6px; color:var(--accent); }
+  p { margin:0 0 8px; }
+  .sub { color:var(--muted); font-size:10.5pt; margin:0 0 3px; }
+  .meta {
+    font-family:ui-monospace,"SF Mono",Menlo,monospace; font-size:8.2pt;
+    color:var(--muted); margin-top:10px; padding-top:8px; border-top:1px solid var(--line);
+    display:flex; gap:22px; flex-wrap:wrap;
+  }
+  .meta b { color:var(--ink); font-weight:600; }
+  table { width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:9.2pt; }
+  th {
+    text-align:left; background:var(--paper); border-bottom:1.5px solid var(--ink);
+    padding:6px 8px; font-size:8.2pt; text-transform:uppercase; letter-spacing:0.5px;
+  }
+  td { padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:nth-child(even) td { background:#fcfcfa; }
+  .box {
+    border:1px solid var(--line); border-left:3px solid var(--accent);
+    background:var(--paper); padding:11px 14px; margin:10px 0; border-radius:3px;
+  }
+  .box.good { border-left-color:var(--ok); }
+  .box.warn { border-left-color:var(--warn); }
+  .chk { list-style:none; padding:0; margin:6px 0; }
+  .chk li {
+    padding:4px 0 4px 26px; position:relative; border-bottom:1px dotted var(--line);
+    font-size:9.4pt;
+  }
+  .chk li:before {
+    content:""; position:absolute; left:2px; top:6px; width:12px; height:12px;
+    border:1.5px solid var(--muted); border-radius:2.5px;
+  }
+  .chk li.done:before {
+    content:"\2713"; border-color:var(--ok); background:var(--ok); color:#fff;
+    font-size:9px; line-height:12px; text-align:center; font-family:sans-serif;
+  }
+  .chk li.done { color:var(--muted); }
+  .pill {
+    display:inline-block; font-family:ui-monospace,Menlo,monospace; font-size:7.4pt;
+    padding:1.5px 6px; border-radius:9px; letter-spacing:0.3px; vertical-align:1px;
+  }
+  .pill.done { background:var(--ok); color:#fff; }
+  .pill.now  { background:var(--accent); color:#fff; }
+  .pill.next { background:#e8e6df; color:var(--muted); }
+  .flow { margin:14px 0 6px; }
+  .two { display:flex; gap:16px; }
+  .two > * { flex:1; }
+  .small { font-size:8.6pt; color:var(--muted); }
+  .pagebreak { page-break-before:always; }
+  .nobreak { page-break-inside:avoid; }
+  code {
+    font-family:ui-monospace,Menlo,monospace; font-size:8.6pt;
+    background:var(--paper); padding:1px 4px; border-radius:2px;
+  }
+</style>
+</head>
+<body>
+
+<h1>PM Controller</h1>
+<p class="sub">Phase 0 — Action plan, milestones and build package · <b>tablet first</b></p>
+<div class="meta">
+  <span><b>Owner</b> Apex Plumbing and Mechanical Services SC</span>
+  <span><b>Pilot</b> Paulson Cheek Mechanical</span>
+  <span><b>Client</b> iPad first · SwiftUI · iOS 18+</span>
+  <span><b>Backend</b> Supabase Postgres</span>
+  <span><b>Issued</b> 20 September 2026</span>
+</div>
+
+<h2>1. What changed, and what did not</h2>
+<p>The original package specified a React mobile-first PWA. The client is now a <b>native
+iPad app</b>, with the phone layout following from the same binary. Everything underneath is
+unchanged — the schema, the row-level security, and all nine non-negotiable principles never
+depended on the client.</p>
+
+<table class="nobreak">
+  <tr><th style="width:38%">Requirement from the Phase 0 risk list</th><th style="width:31%">PWA on iPad / iPhone</th><th style="width:31%">Native</th></tr>
+  <tr><td>Rework notification must reach the Lead with the app closed</td><td>Fragile — needs Home Screen install first</td><td>APNs. Reliable.</td></tr>
+  <tr><td>Close-out under 60 seconds, camera one tap</td><td>File-picker detour</td><td>Direct camera</td></tr>
+  <tr><td>A close-out with no signal must not be lost</td><td>Browser storage evicted under pressure</td><td>SwiftData, survives</td></tr>
+  <tr><td>Crews shoot 12&nbsp;MP images all day</td><td>JavaScript-side compression</td><td>Hardware pipeline</td></tr>
+</table>
+
+<div class="box warn">
+<b>The cost, stated plainly.</b> No Android, and App Store review on every release. Distribution
+to the Leads during the pilot is TestFlight, not the public store — faster, but capped at 100
+internal testers with each build expiring after 90 days.
+</div>
+
+<h3>What it does <i>not</i> cost — seeing it work before paying for anything</h3>
+<table class="nobreak">
+  <tr><th style="width:52%">What you want to do</th><th>What it actually costs</th></tr>
+  <tr><td>Compile it and run it in a Simulator</td><td>A Mac. <b>No Apple account at all.</b> ✓ available</td></tr>
+  <tr><td>Install it on an iPad <b>you own</b></td><td>A Mac and a <b>free</b> Apple ID. Re-sign every 7 days. ✓ available</td></tr>
+  <tr><td>Put it on someone <b>else's</b> iPad (TestFlight)</td><td>$99/yr Apple Developer Program</td></tr>
+  <tr><td>App Store</td><td>$99/yr</td></tr>
+</table>
+<div class="box good">
+<b>A MacBook Pro is available</b>, so the first two rows are already open: build it, run it in the
+iPad Simulator, and install it on your own iPad with a free Apple ID. The $99 is only needed to
+put a build on <i>someone else's</i> device. CI still compiles on a clean machine and photographs
+every screen each run, which catches anything that builds locally only because of something
+already installed on that Mac.
+</div>
+
+<h2>2. Status flow — unchanged, and locked in the database</h2>
+<div class="flow">
+<svg viewBox="0 0 700 132" width="100%" height="132" role="img"
+     aria-label="Status flow from Open through Assigned, In Progress, Review and Accomplished, with a Rework loop between Review and In Progress.">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5b6068"/>
+    </marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a9402f"/>
+    </marker>
+  </defs>
+  <g font-family="Georgia,serif" font-size="10.5" text-anchor="middle">
+    <g>
+      <rect x="4"   y="30" width="92" height="32" rx="5" fill="#f0efeb" stroke="#8a8f96"/>
+      <text x="50"  y="50">Open</text>
+      <rect x="128" y="30" width="92" height="32" rx="5" fill="#e6eef7" stroke="#3d6ea8"/>
+      <text x="174" y="50">Assigned</text>
+      <rect x="252" y="30" width="100" height="32" rx="5" fill="#e2f0ec" stroke="#2a7a67"/>
+      <text x="302" y="50">In Progress</text>
+      <rect x="384" y="30" width="92" height="32" rx="5" fill="#f9f0da" stroke="#b8862a"/>
+      <text x="430" y="50">Review</text>
+      <rect x="508" y="30" width="122" height="32" rx="5" fill="#e4f0e6" stroke="#3f7f4a"/>
+      <text x="569" y="50">Accomplished</text>
+      <rect x="300" y="94" width="92" height="30" rx="5" fill="#f8e6e2" stroke="#a9402f"/>
+      <text x="346" y="113" fill="#a9402f">Rework</text>
+    </g>
+    <g stroke="#5b6068" stroke-width="1.4" fill="none" marker-end="url(#a)">
+      <path d="M96,46 H124"/><path d="M220,46 H248"/>
+      <path d="M352,46 H380"/><path d="M476,46 H504"/>
+    </g>
+    <g stroke="#a9402f" stroke-width="1.4" fill="none" marker-end="url(#ar)">
+      <path d="M430,62 V86 Q430,94 420,94 H396"/>
+      <path d="M300,94 H278 Q268,94 268,86 V62"/>
+    </g>
+    <g font-size="8" fill="#5b6068" text-anchor="middle">
+      <text x="302" y="22">Lead opens a session · one time row per person</text>
+      <text x="569" y="22" fill="#3f7f4a">Super / PM only</text>
+      <text x="470" y="112" fill="#a9402f" text-anchor="start">reason required · Lead's phone buzzes</text>
+      <text x="215" y="112" fill="#a9402f" text-anchor="end">hours flagged rework automatically</text>
+    </g>
+  </g>
+</svg>
+</div>
+<p class="small">Six core statuses, enforced by a Postgres enum. A seventh cannot be inserted from
+any client. Custom board columns sit on top and each maps to exactly one of these, so reporting
+reads core status and never a column name.</p>
+
+<h2>3. Continuous integration</h2>
+<p>Three jobs on every pull request. The first is the one that matters most: SPEC principle 8
+says access control lives in the database, and this is what stops that claim quietly decaying as
+later phases add tables.</p>
+<table class="nobreak">
+  <tr><th style="width:26%">Job</th><th style="width:16%">Runner</th><th>What it proves</th></tr>
+  <tr><td>Row-level security</td><td>ubuntu</td><td>Both migrations applied to a real Postgres 16, then all 56 assertions. Non-zero exit on regression.</td></tr>
+  <tr><td>Build for iPad</td><td>macOS</td><td>The Swift compiles. Nobody needs a Mac for this to be true.</td></tr>
+  <tr><td>Screenshots on iPad</td><td>macOS</td><td>The app runs, photographed as each role, downloadable from the run.</td></tr>
+</table>
+
+<h2>4. Phase plan and milestones</h2>
+<table>
+  <tr><th style="width:5%">#</th><th style="width:29%">Deliverable</th><th style="width:38%">Milestone — checked when</th><th style="width:28%">State</th></tr>
+  <tr><td>0</td><td>Plan, model, flow, checklist</td><td>This package issued</td><td><span class="pill done">DONE</span></td></tr>
+  <tr><td>1</td><td>Schema · auth · admin user setup · row-level security</td><td>Admin creates a Lead by email; that Lead sees only his project and cannot read the receipts tables at all</td><td><span class="pill now">DATABASE GATE MET</span><br><span class="small">56/56 assertions green. iOS shell awaiting a Mac build.</span></td></tr>
+  <tr><td>2</td><td>Task board, columns, role-gated transitions</td><td>A Lead cannot move a task to Accomplished</td><td><span class="pill next">NEXT</span></td></tr>
+  <tr><td>3</td><td>Time capture — crew selection, per-person rows</td><td>One session with 3 crew writes 3 rows</td><td><span class="pill next">—</span></td></tr>
+  <tr><td>4</td><td>Photos, description, quantity at close-out</td><td>Task closes with a photo from a phone in the field</td><td><span class="pill next">—</span></td></tr>
+  <tr><td>5</td><td>Review gate · Rework column · push</td><td>Rejected task lands in Rework and the Lead's phone buzzes</td><td><span class="pill next">—</span></td></tr>
+  <tr><td>6a</td><td>Cost class, change orders, custom columns</td><td>CO hours excluded from base earned value</td><td><span class="pill next">—</span></td></tr>
+  <tr><td>6b</td><td>Schedule fields, GC baselines, blocked periods</td><td>Blocked days attribute to a named party</td><td><span class="pill next">—</span></td></tr>
+  <tr><td>6c</td><td>Work class, discovered defects, source links</td><td>A defect ticket links back to an Accomplished task</td><td><span class="pill next">—</span></td></tr>
+  <tr><td>6d</td><td>Material page — upload, extraction, categories</td><td>A photographed receipt lands categorised, duplicates caught</td><td><span class="pill next">—</span></td></tr>
+  <tr><td>7</td><td>Progress page, every number drillable</td><td>Clicking any figure returns its ticket list; numbers reconcile to a hand-check of one week</td><td><span class="pill next">—</span></td></tr>
+  <tr><td>8</td><td>Pilot on a fresh PCM job</td><td>Two full weeks run without paper backup</td><td><span class="pill next">—</span></td></tr>
+  <tr><td>9</td><td>Closeout — results, improvements, business case</td><td>Final PDF issued</td><td><span class="pill next">—</span></td></tr>
+</table>
+
+<div class="pagebreak"></div>
+
+<h2>5. Phase 1 — what is built and proven</h2>
+
+<div class="box good">
+<b>The Phase 1 milestone is a database claim, and it is now tested rather than asserted.</b>
+Fifty-six assertions run as the role a phone actually holds — <code>authenticated</code>, with a
+real user id — not as the database owner, who bypasses every policy. The suite exits non-zero
+when a rule regresses, so it gates CI.
+</div>
+
+<h3>The matrix, proven</h3>
+<table>
+  <tr><th style="width:26%">Area</th><th style="width:10%">Tests</th><th>What is actually asserted</th></tr>
+  <tr><td>Project isolation</td><td>9</td><td>A Lead sees exactly one project. A sub's Lead on another job sees none of the first job's tasks. A Manager sees every project. The same man is Foreman on one job and Super on another.</td></tr>
+  <tr><td>Material access</td><td>15</td><td>Lead reads zero receipts, zero line items, zero categories. A Foreman reads his own receipt and cannot reach the other Foreman's by id. PM, Assistant PM and Manager read everything.</td></tr>
+  <tr><td>Sign-off</td><td>4</td><td>Lead, Foreman and <b>Assistant PM</b> are all refused. Super is allowed.</td></tr>
+  <tr><td>History</td><td>7</td><td>An Accomplished task cannot be reopened, by anyone, including the Manager. <code>task_events</code> cannot be rewritten even by the service role.</td></tr>
+  <tr><td>Change orders</td><td>4</td><td>Assistant PM and Super refused in both directions. PM allowed.</td></tr>
+  <tr><td>Locked statuses</td><td>5</td><td>A seventh status is impossible. A column cannot map to a status it does not match. <code>rework_count</code> cannot be typed, only derived.</td></tr>
+  <tr><td>Lead movement</td><td>4</td><td>A Lead moves his own task and cannot touch another Lead's, create a task, or kick work back.</td></tr>
+  <tr><td>People &amp; cost</td><td>8</td><td>A Lead cannot read <code>burdened_rate</code> at all. Nobody can be deleted — deactivation is the only path.</td></tr>
+</table>
+
+<h3>Six defects found and fixed in the reviewed schema</h3>
+<p>Four of them would have stopped the app working entirely. Full write-up in
+<code>docs/DECISIONS.md</code>.</p>
+<table>
+  <tr><th style="width:9%">Ref</th><th style="width:45%">Defect</th><th>Effect if shipped</th></tr>
+  <tr><td>FIX-1</td><td><code>citext</code> created after the table that uses it</td><td>Migration could not apply at all</td></tr>
+  <tr><td>FIX-3</td><td><code>auth.uid()</code> is null for service-role writes, but <code>actor_id</code> is NOT NULL</td><td>Every seed and background status change fails</td></tr>
+  <tr><td>FIX-4</td><td>The rework counter trips the guard that protects its own column</td><td>No kick-back can ever be recorded</td></tr>
+  <tr><td>FIX-5</td><td>Cost view unusable as <code>security_invoker</code> under column grants</td><td>Nobody sees burdened rates, PM included</td></tr>
+  <tr><td>FIX-6</td><td>The audit trigger is blocked by its own table's RLS</td><td><b>No status change saves, for any role, with no error that points at the cause</b></td></tr>
+  <tr><td>FIX-2</td><td><code>qty_needs_unit</code> ignored <code>qty_installed</code></td><td>Close-out records "340" with no unit</td></tr>
+</table>
+
+<h2>6. Reminders &amp; checklist</h2>
+
+<h3>Before any more code — these block the build</h3>
+<ul class="chk">
+  <li class="done"><b>Name the app and lock it.</b> PM Controller. Bundle identifier <code>com.apexmech.pmcontroller</code>.</li>
+  <li class="done"><b>Separate it from Apex.</b> An independent product; no contractor's name anywhere in the repo or the demo data.</li>
+  <li class="done"><b>A Mac is available.</b> MacBook Pro — building, Simulator and personal-device install are all open without an Apple Developer account.</li>
+  <li class="done"><b>Ownership settled.</b> Apex Plumbing and Mechanical Services SC owns it: LICENSE, a copyright header on every source file, and <code>NSHumanReadableCopyright</code> in the shipped bundle.</li>
+  <li><b>Confirm Apex controls <code>apexmech.com</code>.</b> The bundle identifier <code>com.apexmech.pmcontroller</code> assumes it. Cheap now, awkward after App Store submission.</li>
+  <li><b>Data-ownership terms with PCM in writing</b> before any of its data is entered. Apex owns the software; the customer owns its records — the LICENSE says so, a signed agreement settles it.</li>
+  <li><b>Create the Supabase project</b> (free tier is sufficient for the pilot) and apply <code>0001</code>, <code>0002</code>, then seed.</li>
+  <li><b>Confirm which iPads and iPhones the crews actually carry.</b> The floor is iOS/iPadOS 18 — anything that cannot reach 18 is deliberately out. Note there is no iOS 19–25: Apple went from 18 straight to 26.</li>
+  <li><b>Apple Developer Program enrolment</b> ($99/yr) — only when you are ready to put builds on other people's devices. Not before.</li>
+</ul>
+
+<h3>Before the pilot goes live</h3>
+<ul class="chk">
+  <li>Written OK from PCM ownership before any PCM data lives in a system you own.</li>
+  <li>Decide data ownership up front: who owns the records if the relationship ends.</li>
+  <li>Decide burdened rates: real numbers, or placeholder multipliers until PCM shares them.</li>
+  <li>Confirm the area / system list matches how PCM actually breaks out its estimates.</li>
+  <li>Confirm the material category list against PCM's estimate breakdown.</li>
+  <li>Agree the root-cause list for defects — short and fixed, never free text.</li>
+  <li>Get the GC's published schedule in a usable form, or accept manual milestone entry per area.</li>
+  <li>TestFlight build in every Lead's hands, with notifications actually tested on their phone.</li>
+  <li>15-minute walkthrough with each Lead — one screen, one rule: close the task before you leave.</li>
+  <li>Run one week in parallel with existing daily reports and compare totals.</li>
+  <li>CSV export path confirmed out of every table, so nothing is trapped.</li>
+</ul>
+
+<h3>Standing rules during the build</h3>
+<ul class="chk">
+  <li class="done">Core statuses locked in the database, not hidden in the UI.</li>
+  <li class="done">Every status change writes to <code>task_events</code>, no exceptions.</li>
+  <li class="done">Never allow direct edit of hours; only start/end times and crew selection.</li>
+  <li class="done">Row-level security enforced in the database, proven by test, not by the UI.</li>
+  <li class="done">Metrics built as saved filters from the start, so drill-down is free rather than a rewrite.</li>
+  <li class="done">CI gates the access rules, so a later phase cannot quietly break them.</li>
+  <li>Tablet layout first; the phone layout follows by size class from the same binary.</li>
+  <li>Offline tolerance: a close-out with no signal must not be lost.</li>
+  <li>Photo compression on upload — receipts must stay legible enough to audit against.</li>
+  <li>Rework notification must reach the Lead with the app closed.</li>
+</ul>
+
+<h2>7. Risks still live</h2>
+<table>
+  <tr><th style="width:34%">Risk</th><th>Handling</th></tr>
+  <tr><td>Leads don't close tasks in the field</td><td>Close-out under 60 seconds: crew already selected, camera one tap, quantity one field. Measured on a real phone in Phase 4, not assumed.</td></tr>
+  <tr><td>PCM says "that's just part of your job"</td><td>Apex owns PM Controller outright — asserted in LICENSE and in every source file. PCM is the pilot customer, not a co-owner. Get it in writing before go-live.</td></tr>
+  <tr><td>Rework becomes a blame tool</td><td>Reasons describe the condition, not the person. Defect rate is never shown per individual — by system, area and phase only. This is built in, not policy.</td></tr>
+  <tr><td>Scope creep into a full ERP</td><td>v1 ships with no scheduling, no invoicing, no payroll export, no Android.</td></tr>
+  <tr><td>App Store review delays a fix</td><td>TestFlight for the pilot; expedited review exists for genuine blockers. Budget 24–48 hours for any store release.</td></tr>
+  <tr><td>Data trust</td><td>Phase 7 is not done until a week of app numbers matches a hand tally.</td></tr>
+</table>
+
+<div class="box">
+<b>Next artifact:</b> Phase 1 completion PDF — full chat interactions plus summary — issued once
+the app has been built green in CI and a real Lead has signed in against a live Supabase project.
+The database half of Phase 1 is already proven and is recorded above.
+</div>
+
+</body>
+</html>
