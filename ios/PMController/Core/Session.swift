@@ -12,8 +12,7 @@ import Supabase
 // =====================================================================
 
 @MainActor
-@Observable
-final class Session {
+final class Session: ObservableObject {
 
     enum State: Equatable {
         case loading
@@ -24,10 +23,10 @@ final class Session {
         case ready
     }
 
-    private(set) var state: State = .loading
-    private(set) var user: AppUser?
-    private(set) var memberships: [Membership] = []
-    private(set) var errorMessage: String?
+    @Published private(set) var state: State = .loading
+    @Published private(set) var user: AppUser?
+    @Published private(set) var memberships: [Membership] = []
+    @Published private(set) var errorMessage: String?
 
     /// The role to show in the UI when no single project is selected.
     /// A Manager is company-wide; everyone else is described by the job
@@ -83,7 +82,7 @@ final class Session {
         }
     }
 
-    private(set) var isPreview = false
+    @Published private(set) var isPreview = false
 
     // -----------------------------------------------------------------
     // Lifecycle

@@ -120,7 +120,8 @@ The anon key is the only key that ships. Every query carries the signed-in user'
 
 ### 4. Before you get much further
 
-- **Confirm which iPads and iPhones the crews carry.** iOS/iPadOS 17 is assumed.
+- **Confirm which iPads and iPhones the crews carry.** The floor is iOS/iPadOS 16, which runs on
+  16, 18, 26 and everything after — a deployment target is a minimum, not a maximum.
 - **Start Apple Developer enrolment** ($99/yr) only when you are ready to put builds on other
   people's devices. See below — you do not need it before then.
 

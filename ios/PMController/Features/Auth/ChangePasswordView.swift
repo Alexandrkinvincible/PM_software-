@@ -3,7 +3,7 @@ import SwiftUI
 /// First login. The issued password is a delivery mechanism, not a
 /// credential — this screen is the only thing in the app until it is gone.
 struct ChangePasswordView: View {
-    @Environment(Session.self) private var session
+    @EnvironmentObject private var session
     @State private var password = ""
     @State private var confirmation = ""
     @State private var isWorking = false

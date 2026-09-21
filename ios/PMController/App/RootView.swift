@@ -6,7 +6,7 @@ import SwiftUI
 /// and nothing behind it to peek at — which is the point of issuing
 /// credentials rather than letting people register themselves.
 struct RootView: View {
-    @Environment(Session.self) private var session
+    @EnvironmentObject private var session
 
     var body: some View {
         switch session.state {
@@ -80,26 +80,33 @@ struct SetupNeededView: View {
     }
 }
 
-#Preview("Home — Super") {
-    HomeView().environment(Session.preview())
-}
+// #Preview is an iOS 17 macro. PreviewProvider is the portable
+// spelling and gives the same canvases in Xcode.
+struct PMControllerPreviews: PreviewProvider {
+    static var previews: some View {
+        Group {
+            HomeView()
+                .environmentObject(Session.preview())
+                .previewDisplayName("Home — Super")
 
-#Preview("Home — Lead") {
-    HomeView().environment(
-        Session.preview(user: PreviewData.lead, memberships: PreviewData.leadMemberships)
-    )
-}
+            HomeView()
+                .environmentObject(
+                    Session.preview(user: PreviewData.lead,
+                                    memberships: PreviewData.leadMemberships)
+                )
+                .previewDisplayName("Home — Lead")
 
-#Preview("Sign in") {
-    LoginView().environment(Session.preview(state: .signedOut))
-}
+            LoginView()
+                .environmentObject(Session.preview(state: .signedOut))
+                .previewDisplayName("Sign in")
 
-#Preview("First login") {
-    ChangePasswordView().environment(
-        Session.preview(state: .mustChangePassword)
-    )
-}
+            ChangePasswordView()
+                .environmentObject(Session.preview(state: .mustChangePassword))
+                .previewDisplayName("First login")
 
-#Preview("Not connected") {
-    SetupNeededView()
+            SetupNeededView()
+                .previewDisplayName("Not connected")
+        }
+        .previewDevice("iPad Pro (12.9-inch) (6th generation)")
+    }
 }

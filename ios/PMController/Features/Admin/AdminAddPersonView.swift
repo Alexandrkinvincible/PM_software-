@@ -12,7 +12,7 @@ import SwiftUI
 // =====================================================================
 
 struct AdminAddPersonView: View {
-    @Environment(Session.self) private var session
+    @EnvironmentObject private var session
     @Environment(\.dismiss) private var dismiss
 
     @State private var name = ""

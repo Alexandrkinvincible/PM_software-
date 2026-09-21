@@ -74,6 +74,20 @@ jobs:
              PMController/Resources/Config.xcconfig
           xcodegen generate
 
+      - name: Check the deployment target has not drifted up
+        run: |
+          set -euo pipefail
+          # The compiler is the real guard: with a 16.0 floor it refuses
+          # any newer API outright. This only catches someone raising the
+          # floor itself, which the compiler would happily accept.
+          FLOOR=$(grep -A4 'deploymentTarget:' ios/project.yml \
+                  | grep -o 'iOS: "[0-9.]*"' | grep -o '[0-9.]*')
+          echo "deployment target: iOS $FLOOR"
+          if [ "$FLOOR" != "16.0" ]; then
+            echo "::error::Deployment target moved to $FLOOR; the agreed floor is 16.0."
+            exit 1
+          fi
+
       - name: Build
         working-directory: ios
         run: |

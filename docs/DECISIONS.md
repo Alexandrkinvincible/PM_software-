@@ -34,6 +34,34 @@ A laptop version later is not free: SwiftUI reaches the Mac through Catalyst or 
 target, and neither is a checkbox. Worth deciding before Phase 7, since the progress page is the
 screen that most wants a big display.
 
+**A5 — Deployment target is iOS/iPadOS 16.0, so the app runs on 16 through 26 and beyond.**
+Asked for as "iOS 26 and older". Worth stating plainly because it is a common trap: a deployment
+target is the **minimum** OS the app will install on, never the maximum. The previous 17.0 floor
+already ran on 26; it simply excluded anything older. Apple's jump from iOS 18 to iOS 26 in 2025
+renumbered the releases, it did not change that rule.
+
+So the real question was how far *back* to go, and that is a cost question:
+
+| Floor | What it costs |
+|---|---|
+| 17 | Nothing — where we started |
+| **16** | **`@Observable` → `ObservableObject`, `#Preview` → `PreviewProvider`, `.topBarTrailing` → `.navigationBarTrailing`. Nine call sites. Chosen.** |
+| 15 | The above, plus losing `NavigationStack`, `.presentationDetents` and `.tracking` — a real rewrite of the navigation layer |
+
+16 was chosen because it is the last cheap step. It picks up roughly the 2017-era iPads that 17
+drops, which is exactly the kind of hand-me-down tablet that ends up on a job site. Going to 15
+buys only hardware from around 2014, which will not run this usefully.
+
+The cost is that `Session` is now an `ObservableObject` with `@Published` properties rather than
+the tidier `@Observable`. That is a fair trade for not discovering mid-pilot that a Lead's tablet
+cannot install the app. Raising the floor later is a one-line change plus deleting compatibility
+spellings; lowering it after the fact is not.
+
+**What CI can and cannot prove here.** The compiler enforces the floor: with a 16.0 deployment
+target it refuses any newer API outright, so an accidental iOS 17-only call fails the build. What
+CI cannot do is *run* the app on iOS 16 — GitHub's runners carry only recent simulator runtimes.
+Actual behaviour on an old iPad still needs an old iPad.
+
 **A4 — Shipping does not require the $99 Apple Developer Program, and seeing it does not
 require a Mac.**
 The question was asked directly, so the answer is recorded. The paid program is needed only to
@@ -198,6 +226,7 @@ These are not decided. They are carried from SPEC §13 and need answers from PCM
 - Whether PCM shares estimated hours per system or only total contract hours.
 - Whether Supervisor should have wider material visibility than Foreman (C5 assumes not).
 - Written sign-off from PCM ownership before any PCM data lives in a system you own.
-- Which iPads and iPhones the crews carry (A2).
+- Which iPads and iPhones the crews carry (A2, A5). The 16.0 floor is a guess at "anything
+  plausibly in service"; a real inventory would confirm or cheapen it.
 - Whether a Mac is available for interactive development (A4).
 - Whether the laptop version is Catalyst or a separate Mac target (A2). Decide before Phase 7.
