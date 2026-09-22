@@ -9,6 +9,9 @@ Tablet first. Phone second. Laptop later.
 Owned by Apex Plumbing and Mechanical Services SC — see [LICENSE](LICENSE). Pilot customer: Paulson Cheek
 Mechanical. Apex owns the software; a customer owns its own records.
 
+**Setting it up: [SETUP.md](SETUP.md).** Xcode first — the app runs and shows real screens
+with no database at all.
+
 **[SPEC.md](SPEC.md) is authoritative.** Every phase reads it.
 [docs/DECISIONS.md](docs/DECISIONS.md) records what was assumed and why.
 [docs/Phase0_Build_Package.pdf](docs/Phase0_Build_Package.pdf) is the plan, milestones
@@ -53,6 +56,7 @@ against the database — as the role a phone actually holds, never as the owner.
 
 ```
 SPEC.md                              authoritative spec
+SETUP.md                             getting it running: Xcode first, Supabase second
 docs/DECISIONS.md                    assumptions and the six schema defects found
 docs/Phase0_Build_Package.pdf    plan, milestones, checklist
 
@@ -62,7 +66,7 @@ supabase/
   seed.sql                           one project, one user per role, plus the
                                      second Foreman that makes isolation testable
   tests/00_local_stub.sql            auth.users / auth.uid() for a plain Postgres
-  tests/01_rls_test.sql              the 56 assertions
+  tests/01_rls_test.sql              the 69 assertions
   functions/admin-create-user/       the only thing holding a service-role key
 
 ios/
@@ -86,22 +90,59 @@ scripts/pick-simulator.py            ask CI's runner which iPad it actually has
 
 ## Your steps, in order
 
-### 1. Supabase project (15 minutes)
+Full detail is in **[SETUP.md](SETUP.md)**. The short version:
 
-Create a free project at [supabase.com](https://supabase.com). From the SQL editor, run in order:
+### 1. Run it on your Mac, tonight, with nothing else
+
+No Supabase, no Apple account, no money.
+
+```bash
+brew install xcodegen
+git clone https://github.com/Alexandrkinvincible/PM_software-.git
+cd PM_software-/ios
+cp PMController/Resources/Config.example.xcconfig PMController/Resources/Config.xcconfig
+xcodegen generate
+open PMController.xcodeproj
+```
+
+Needs **Xcode 16 or newer** — that is what carries the iOS 18 SDK. (The current release is
+numbered 26.x. Apple renamed Xcode to the OS year in 2025, so 26 is newer than 16.)
+
+Pick an **iPad** simulator and press ⌘R. The first build sits for several minutes while Swift
+Package Manager fetches `supabase-swift`; it is not hung.
+
+You get a **"Not connected yet"** screen. That is correct — the build works, there is just no
+database behind it.
+
+### 2. Turn on preview mode and see the real thing
+
+**Product → Scheme → Edit Scheme → Run → Arguments → Arguments Passed On Launch**, two rows:
+
+```
+-PMControllerPreview        YES
+-PMControllerPreviewRole    super-board
+```
+
+⌘R again and you are on the board with canned data mirroring `supabase/seed.sql`. Change the
+second value to `lead-board`, `manager`, `lead`, `super`, `first-login` or `signed-out`.
+
+Run `super-board` and `lead-board` back to back. Same job, same cards — the difference between
+them is the role matrix, which is the thing worth judging.
+
+### 3. Then connect a database
+
+Create a free project at [supabase.com](https://supabase.com) and run, in order:
 
 1. `supabase/migrations/0001_schema.sql`
 2. `supabase/migrations/0002_rls.sql`
 
 Do **not** run `supabase/tests/00_local_stub.sql` against Supabase — it fakes `auth.users` and
-`auth.uid()`, which Supabase already provides. It exists so the migrations can be tested on a
-plain Postgres.
+`auth.uid()`, which Supabase already provides. Do **not** run `supabase/seed.sql` either: it
+writes to `auth.users` with fixed ids and no passwords, so none of those accounts can sign in.
+[SETUP.md](SETUP.md) has the bootstrap SQL for your own first Manager account instead.
 
-Then create your own Manager account: add yourself through **Authentication → Users**, and insert
-the matching `users` row plus a `project_members` row with `role = 'manager'`. Everyone after you
-is created from inside the app.
-
-### 2. Deploy the admin function
+Then fill in `Config.xcconfig`, remove the preview launch arguments, and deploy the admin
+function:
 
 ```bash
 supabase functions deploy admin-create-user
@@ -110,31 +151,11 @@ supabase functions deploy admin-create-user
 It is the only thing that touches the service-role key, and it re-checks that the caller is an
 active Manager before it does. The key never reaches the app.
 
-### 3. Build the app
-
-```bash
-brew install xcodegen
-cd ios
-cp PMController/Resources/Config.example.xcconfig PMController/Resources/Config.xcconfig
-#   fill in SUPABASE_URL and SUPABASE_ANON_KEY
-xcodegen generate
-open PMController.xcodeproj
-```
-
-The anon key is the only key that ships. Every query carries the signed-in user's JWT, so
-`0002_rls.sql` is what decides what comes back.
-
-> The Swift in this repo has **not been compiled locally** — there is no Swift toolchain on the
-> machine it was written on. The `Build for iPad` CI job is what compiles it; check that it is
-> green before assuming it builds. The SQL, by contrast, has been applied and tested end to end.
-
 ### 4. Before you get much further
 
 - **Confirm which iPads and iPhones the crews carry.** The floor is iOS/iPadOS 18, which runs on
   18, 26 and everything after — a deployment target is a minimum, not a maximum. There is no
   iOS 19–25; Apple went from 18 straight to 26.
-- **Confirm Apex controls `apexmech.com`.** The bundle identifier assumes it. Cheap to change
-  now, awkward after App Store submission.
 - **Start Apple Developer enrolment** ($99/yr) only when you are ready to put builds on other
   people's devices. See below — you do not need it before then.
 
@@ -165,7 +186,7 @@ Three jobs on every pull request:
 
 | Job | Runner | What it proves |
 |---|---|---|
-| Row-level security | ubuntu | Both migrations applied to a real Postgres 16, then the 56 assertions |
+| Row-level security | ubuntu | Both migrations applied to a real Postgres 16, then the 69 assertions |
 | Build for iPad | macOS | The Swift compiles |
 | Screenshots on iPad | macOS | The app runs, photographed as each role, uploaded as an artifact |
 
