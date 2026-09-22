@@ -12,7 +12,14 @@ Mechanical. Apex owns the software; a customer owns its own records.
 **[SPEC.md](SPEC.md) is authoritative.** Every phase reads it.
 [docs/DECISIONS.md](docs/DECISIONS.md) records what was assumed and why.
 [docs/Phase0_Build_Package.pdf](docs/Phase0_Build_Package.pdf) is the plan, milestones
-and checklist.
+and checklist. Each phase carries its own record in `docs/`:
+
+| Document | |
+|---|---|
+| `Phase0_Build_Package.pdf` | Plan, milestones, checklist |
+| `Phase1_Completion.pdf` | Schema, auth, RLS — what was delivered and what was not |
+| `Phase2_Action_Plan.pdf` | The board, planned before it was built |
+| `Phase2_Completion.pdf` | The board, as delivered |
 
 ---
 
@@ -22,8 +29,9 @@ and checklist.
 |---|---|
 | 0 — Plan, model, flow, checklist | **Issued** |
 | 1 — Schema · auth · admin setup · row-level security | **Complete** — merged in PR #1. |
-| 2 — Task board, columns, role-gated transitions | **Database gate met** — 69/69 assertions. App built, in review. |
-| 3 onwards | Not started |
+| 2 — Task board, columns, role-gated transitions | **Complete** — merged in PR #2. |
+| 3 — Time capture, crew selection, per-person rows | Not started |
+| 4 onwards | Not started |
 
 The Phase 1 milestone is *"an admin creates a Lead by email, and that Lead sees only his project
 and cannot read the receipts tables at all."* That is a claim about the database, so it is tested
