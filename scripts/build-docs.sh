@@ -27,3 +27,4 @@ render() {
 render phase0.html Phase0_Build_Package.pdf
 render phase1.html Phase1_Completion.pdf
 render phase2.html Phase2_Action_Plan.pdf
+render phase2-completion.html Phase2_Completion.pdf
