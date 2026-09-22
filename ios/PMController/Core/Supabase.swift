@@ -63,6 +63,12 @@ enum AppConfig {
     static var previewPersona: String {
         UserDefaults.standard.string(forKey: "PMControllerPreviewRole") ?? "super"
     }
+
+    /// Preview personas ending in "-board" open straight onto the board,
+    /// so CI can photograph it without driving the UI.
+    static var previewOpensBoard: Bool {
+        isPreview && previewPersona.hasSuffix("-board")
+    }
 }
 
 /// Globals are lazy in Swift, so this is never constructed in preview mode

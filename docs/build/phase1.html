@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PM Controller — Phase 1 Completion</title>
+<style>
+  @page { size: Letter; margin: 16mm 14mm 14mm 14mm; }
+  :root { --ink:#16181d; --muted:#5b6068; --line:#dcdbd6; --paper:#faf9f5;
+          --accent:#b8563a; --ok:#3f7f4a; --warn:#b8862a; --bad:#a9402f; }
+  * { box-sizing:border-box; }
+  body { font-family:"Charter","Georgia",serif; color:var(--ink);
+         font-size:10.2pt; line-height:1.5; margin:0; background:#fff; }
+  h1 { font-size:26pt; margin:0 0 2px; letter-spacing:-0.5px; line-height:1.1; }
+  h2 { font-size:13pt; margin:22px 0 9px; padding-bottom:5px;
+       border-bottom:2px solid var(--ink); letter-spacing:-0.2px; }
+  h3 { font-size:10.8pt; margin:15px 0 6px; color:var(--accent); }
+  p { margin:0 0 8px; }
+  .sub { color:var(--muted); font-size:10.5pt; margin:0 0 3px; }
+  .meta { font-family:ui-monospace,Menlo,monospace; font-size:8.2pt; color:var(--muted);
+          margin-top:10px; padding-top:8px; border-top:1px solid var(--line);
+          display:flex; gap:22px; flex-wrap:wrap; }
+  .meta b { color:var(--ink); font-weight:600; }
+  table { width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:9.2pt; }
+  th { text-align:left; background:var(--paper); border-bottom:1.5px solid var(--ink);
+       padding:6px 8px; font-size:8.2pt; text-transform:uppercase; letter-spacing:0.5px; }
+  td { padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:nth-child(even) td { background:#fcfcfa; }
+  .box { border:1px solid var(--line); border-left:3px solid var(--accent);
+         background:var(--paper); padding:11px 14px; margin:10px 0; border-radius:3px; }
+  .box.good { border-left-color:var(--ok); }
+  .box.warn { border-left-color:var(--warn); }
+  .chk { list-style:none; padding:0; margin:6px 0; }
+  .chk li { padding:4px 0 4px 26px; position:relative;
+            border-bottom:1px dotted var(--line); font-size:9.4pt; }
+  .chk li:before { content:""; position:absolute; left:2px; top:6px; width:12px; height:12px;
+                   border:1.5px solid var(--muted); border-radius:2.5px; }
+  .chk li.done:before { content:"\2713"; border-color:var(--ok); background:var(--ok);
+                        color:#fff; font-size:9px; line-height:12px; text-align:center;
+                        font-family:sans-serif; }
+  .chk li.done { color:var(--muted); }
+  .small { font-size:8.6pt; color:var(--muted); }
+  .pagebreak { page-break-before:always; }
+  .nobreak { page-break-inside:avoid; }
+  code { font-family:ui-monospace,Menlo,monospace; font-size:8.6pt;
+         background:var(--paper); padding:1px 4px; border-radius:2px; }
+  .log { border-left:2px solid var(--line); padding-left:14px; margin:10px 0; }
+  .log .turn { margin-bottom:11px; }
+  .log .ask { font-weight:600; }
+  .log .did { color:var(--muted); font-size:9.3pt; }
+</style>
+</head>
+<body>
+
+<h1>PM Controller</h1>
+<p class="sub">Phase 1 — Completion record · schema, auth, admin setup, row-level security</p>
+<div class="meta">
+  <span><b>Owner</b> Apex Plumbing and Mechanical Services SC</span>
+  <span><b>Pilot</b> Paulson Cheek Mechanical</span>
+  <span><b>Merged</b> PR #1 · 21 September 2026</span>
+  <span><b>Status</b> Milestone met</span>
+</div>
+
+<h2>1. The milestone, and how it was proven</h2>
+<div class="box good">
+<b>"An admin creates a Lead by email, and that Lead sees only his project and cannot read the
+receipts tables at all."</b><br>
+That is a claim about the database, so it was tested against the database — as the role a phone
+actually holds (<code>authenticated</code>, with a real signed-in user id), never as the owner,
+who bypasses every policy. <b>56 of 56 assertions pass.</b>
+</div>
+
+<table class="nobreak">
+  <tr><th style="width:24%">Area</th><th style="width:9%">Tests</th><th>What is actually asserted</th></tr>
+  <tr><td>Project isolation</td><td>9</td><td>A Lead sees exactly one project. A sub's Lead on another job sees none of the first job's tasks. The same man is Foreman on one job and Super on another.</td></tr>
+  <tr><td>Material access</td><td>15</td><td>Lead reads zero receipts, zero line items, zero categories. A Foreman cannot reach the other Foreman's receipt by id. PM, Assistant PM and Manager read everything.</td></tr>
+  <tr><td>Sign-off</td><td>4</td><td>Lead, Foreman and <b>Assistant PM</b> refused. Super allowed.</td></tr>
+  <tr><td>History</td><td>7</td><td>An Accomplished task cannot be reopened by anyone, the Manager included. <code>task_events</code> cannot be rewritten even by the service role.</td></tr>
+  <tr><td>Change orders</td><td>4</td><td>Assistant PM and Super refused in both directions. PM allowed.</td></tr>
+  <tr><td>Locked statuses</td><td>5</td><td>A seventh status is impossible. <code>rework_count</code> cannot be typed, only derived.</td></tr>
+  <tr><td>Lead movement</td><td>4</td><td>Moves his own task only; cannot create, kick back, or touch another Lead's.</td></tr>
+  <tr><td>People &amp; cost</td><td>8</td><td>A Lead cannot read <code>burdened_rate</code> at all. Nobody can be deleted — deactivation is the only path.</td></tr>
+</table>
+
+<p><b>The gate was verified to actually gate.</b> Introducing one deliberate leak — a Foreman able
+to see another Foreman's receipts — fails five assertions and exits non-zero. A test suite that
+has never been seen to fail is not evidence of anything.</p>
+
+<h2>2. Six defects found in the reviewed schema</h2>
+<p>Four of them would have stopped the app working entirely. Each is marked <code>[FIX-n]</code>
+at the place it was fixed; the full write-up is in <code>docs/DECISIONS.md</code>.</p>
+<table>
+  <tr><th style="width:9%">Ref</th><th style="width:44%">Defect</th><th>Effect if it had shipped</th></tr>
+  <tr><td>FIX-6</td><td>The audit trigger was blocked by its own table's row-level security</td><td><b>No status change saves, for any role, with no error pointing at the cause</b></td></tr>
+  <tr><td>FIX-1</td><td><code>citext</code> created after the table that uses it</td><td>Migration could not apply at all</td></tr>
+  <tr><td>FIX-3</td><td><code>auth.uid()</code> is null for service-role writes, but <code>actor_id</code> is NOT NULL</td><td>Every seed and background status change fails</td></tr>
+  <tr><td>FIX-4</td><td>The rework counter trips the guard protecting its own column</td><td>No kick-back could ever be recorded</td></tr>
+  <tr><td>FIX-5</td><td>Cost view unusable as <code>security_invoker</code> under column grants</td><td>Nobody sees burdened rates, PM included</td></tr>
+  <tr><td>FIX-2</td><td><code>qty_needs_unit</code> ignored <code>qty_installed</code></td><td>Close-out records "340" with no unit</td></tr>
+</table>
+
+<div class="pagebreak"></div>
+
+<h2>3. Decision log — how Phase 1 actually went</h2>
+<p class="small">A record of each request and what came of it. Summarised rather than transcribed,
+so it stays readable; the commit history and <code>docs/DECISIONS.md</code> carry the detail.</p>
+
+<div class="log">
+  <div class="turn"><span class="ask">Build it as an Apple app, not a website.</span><br>
+    <span class="did">SPEC §9 changed from React PWA to native SwiftUI. Backend untouched — the
+    schema and policies never depended on the client. The three reasons were risks the Phase 0
+    plan had already flagged: push notifications reaching a Lead with the app closed, camera in
+    one tap, and a close-out surviving no signal.</span></div>
+
+  <div class="turn"><span class="ask">Name it PM Controller. Separate it from Apex. Tablet first. Add CI.</span><br>
+    <span class="did">Renamed throughout. Demo data de-branded. <code>TARGETED_DEVICE_FAMILY "1,2"</code>
+    — one binary, layouts diverging by size class. Three CI jobs added: row-level security, an
+    iPad build, and screenshots of the app running.</span></div>
+
+  <div class="turn"><span class="ask">Can I see results before paying for a developer account?</span><br>
+    <span class="did">Yes — the $99 is only needed to put a build on someone else's device. The
+    real prerequisite was a Mac, and CI covers most of it: GitHub's macOS runners are free on
+    public repositories, so every push now photographs the app on an iPad.</span></div>
+
+  <div class="turn"><span class="ask">Go as old as iOS 24.</span><br>
+    <span class="did"><b>Raised as a factual error:</b> there is no iOS 24, and no 19 through 25.
+    Apple went from 18 straight to 26 in 2025. Read as "the 2024 release" and set to iOS 18 —
+    which also reverted a costly detour to iOS 16 made an hour earlier.</span></div>
+
+  <div class="turn"><span class="ask">Apex owns the app. Make sure it's in the code.</span><br>
+    <span class="did">Reversed the earlier separation. Ownership now asserted in
+    <code>LICENSE</code>, a copyright header on all 17 source files, and
+    <code>NSHumanReadableCopyright</code> so it ships inside the binary.</span></div>
+
+  <div class="turn"><span class="ask">Use the full legal name. iOS 18 works.</span><br>
+    <span class="did">Apex Plumbing and Mechanical Services SC everywhere. Two things a plain
+    replace missed: the name wrapped across a line in LICENSE exactly where the "Apex" shorthand
+    is defined, and the documents were still quoting a bundle identifier that had changed.</span></div>
+
+  <div class="turn"><span class="ask">apexmech.com is ours. Merge it.</span><br>
+    <span class="did">Bundle identifier <code>com.apexmech.pmcontroller</code> confirmed correct.
+    PR #1 merged with a merge commit rather than a squash — three of its six commits record CI
+    failures and their causes, and on a project whose own principle is that the audit trail is
+    the product, discarding that would be the wrong instinct.</span></div>
+</div>
+
+<h3>Three CI failures, none of them flakes</h3>
+<table class="nobreak">
+  <tr><th style="width:34%">Failure</th><th>Cause</th></tr>
+  <tr><td>Incompatible device</td><td>The simulator picker chose a 2017 iPad Pro that iOS 26.5 will not run. Having a device type and a runtime does not mean they pair. Now reads each runtime's published <code>supportedDeviceTypes</code>.</td></tr>
+  <tr><td>Generic parameter could not be inferred</td><td><code>@EnvironmentObject</code> needs an explicit type where <code>@Environment(Session.self)</code> infers one. Introduced by the iOS 16 conversion that was later reverted.</td></tr>
+  <tr><td>Missing bundle ID</td><td>Supplying <code>INFOPLIST_FILE</code> means Xcode synthesises nothing, so <code>CFBundleIdentifier</code> was simply absent and the built app could not be installed.</td></tr>
+</table>
+
+<h2>4. What is verified, and what is not</h2>
+<table>
+  <tr><th style="width:50%">Verified</th><th>Not verified</th></tr>
+  <tr>
+    <td>
+      • Both migrations apply to a real Postgres 16<br>
+      • 56/56 policy assertions, run as a signed-in user<br>
+      • The suite fails loudly when a rule regresses<br>
+      • The Swift compiles for iPad at the iOS 18 floor<br>
+      • The app launches and renders every Phase 1 screen
+    </td>
+    <td>
+      • The Edge Function has never been deployed<br>
+      • No migration has run against a live Supabase project<br>
+      • Nobody has signed in with a real credential<br>
+      • Behaviour on a physical iPad — CI carries only recent simulator runtimes<br>
+      • Push notifications (Phase 5) entirely
+    </td>
+  </tr>
+</table>
+
+<h2>5. Carried into Phase 2</h2>
+<ul class="chk">
+  <li class="done">App named and locked — PM Controller, <code>com.apexmech.pmcontroller</code></li>
+  <li class="done">Ownership asserted in the code</li>
+  <li class="done">Deployment floor settled at iOS/iPadOS 18</li>
+  <li class="done">A Mac is available; no Apple Developer Program needed yet</li>
+  <li class="done">CI gates the access rules on every push</li>
+  <li><b>Create the Supabase project</b> and apply <code>0001</code>, <code>0002</code>, then seed</li>
+  <li><b>Deploy <code>admin-create-user</code></b> and create the first real Manager</li>
+  <li><b>Open it in Xcode and run it</b> — the first thing CI cannot do for you</li>
+  <li><b>Data-ownership terms with PCM in writing</b> before any of its data is entered</li>
+  <li>Confirm which iPads the crews carry — anything below iPadOS 18 is out</li>
+  <li>Burdened rates: real figures, or placeholder multipliers</li>
+</ul>
+
+<div class="box warn">
+<b>The one thing to watch.</b> Everything proven so far is proven against a database on a test
+machine. The first real sign-in, against a real Supabase project, is where Phase 1 stops being a
+claim. It is a fifteen-minute job and it is worth doing before Phase 2 gets long.
+</div>
+
+<h2>6. Ideas worth keeping</h2>
+<table>
+  <tr><th style="width:30%">Idea</th><th>Why it came up</th></tr>
+  <tr><td>Tool disposition flag</td><td>The Phase 0 plan had a job-charged vs. returns-to-shop flag on tools that SPEC §6 dropped. It is a real source of quiet job overrun and belongs in Phase 6d.</td></tr>
+  <tr><td>Screenshots as a review artifact</td><td>Built to work around not having a Mac; worth keeping permanently. Every push produces a visual record of what the app looked like on that commit.</td></tr>
+  <tr><td>The seed data doubles as preview data</td><td>Preview mode mirrors <code>seed.sql</code>, including the man who is Super on one job and Foreman on another. It keeps screenshots honest and makes the per-project role rule visible in every one of them.</td></tr>
+  <tr><td>The test suite is a sales asset</td><td>"A Foreman cannot see another Foreman's receipts, and here is the test that proves it" is a stronger claim to a pilot customer than any feature list.</td></tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PM Controller — Phase 2 Action Plan</title>
+<style>
+  @page { size: Letter; margin: 16mm 14mm 14mm 14mm; }
+  :root { --ink:#16181d; --muted:#5b6068; --line:#dcdbd6; --paper:#faf9f5;
+          --accent:#b8563a; --ok:#3f7f4a; --warn:#b8862a; --bad:#a9402f; }
+  * { box-sizing:border-box; }
+  body { font-family:"Charter","Georgia",serif; color:var(--ink);
+         font-size:10.2pt; line-height:1.5; margin:0; background:#fff; }
+  h1 { font-size:26pt; margin:0 0 2px; letter-spacing:-0.5px; line-height:1.1; }
+  h2 { font-size:13pt; margin:22px 0 9px; padding-bottom:5px;
+       border-bottom:2px solid var(--ink); letter-spacing:-0.2px; }
+  h3 { font-size:10.8pt; margin:15px 0 6px; color:var(--accent); }
+  p { margin:0 0 8px; }
+  .sub { color:var(--muted); font-size:10.5pt; margin:0 0 3px; }
+  .meta { font-family:ui-monospace,Menlo,monospace; font-size:8.2pt; color:var(--muted);
+          margin-top:10px; padding-top:8px; border-top:1px solid var(--line);
+          display:flex; gap:22px; flex-wrap:wrap; }
+  .meta b { color:var(--ink); font-weight:600; }
+  table { width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:9.2pt; }
+  th { text-align:left; background:var(--paper); border-bottom:1.5px solid var(--ink);
+       padding:6px 8px; font-size:8.2pt; text-transform:uppercase; letter-spacing:0.5px; }
+  td { padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:nth-child(even) td { background:#fcfcfa; }
+  .box { border:1px solid var(--line); border-left:3px solid var(--accent);
+         background:var(--paper); padding:11px 14px; margin:10px 0; border-radius:3px; }
+  .box.good { border-left-color:var(--ok); }
+  .box.warn { border-left-color:var(--warn); }
+  .chk { list-style:none; padding:0; margin:6px 0; }
+  .chk li { padding:4px 0 4px 26px; position:relative;
+            border-bottom:1px dotted var(--line); font-size:9.4pt; }
+  .chk li:before { content:""; position:absolute; left:2px; top:6px; width:12px; height:12px;
+                   border:1.5px solid var(--muted); border-radius:2.5px; }
+  .chk li.done:before { content:"\2713"; border-color:var(--ok); background:var(--ok);
+                        color:#fff; font-size:9px; line-height:12px; text-align:center;
+                        font-family:sans-serif; }
+  .chk li.done { color:var(--muted); }
+  .small { font-size:8.6pt; color:var(--muted); }
+  .pagebreak { page-break-before:always; }
+  .nobreak { page-break-inside:avoid; }
+  code { font-family:ui-monospace,Menlo,monospace; font-size:8.6pt;
+         background:var(--paper); padding:1px 4px; border-radius:2px; }
+  .log { border-left:2px solid var(--line); padding-left:14px; margin:10px 0; }
+  .log .turn { margin-bottom:11px; }
+  .log .ask { font-weight:600; }
+  .log .did { color:var(--muted); font-size:9.3pt; }
+</style>
+</head>
+<body>
+
+<h1>PM Controller</h1>
+<p class="sub">Phase 2 — Action plan · the task board, columns, drag, role-gated transitions</p>
+<div class="meta">
+  <span><b>Owner</b> Apex Plumbing and Mechanical Services SC</span>
+  <span><b>Milestone</b> A Lead cannot move a task to Accomplished</span>
+  <span><b>Target</b> iPad first · iOS 18</span>
+  <span><b>Issued</b> 21 September 2026</span>
+</div>
+
+<h2>1. What Phase 2 is, and what it is not</h2>
+<p>SPEC §12 gives Phase 2 one line: <i>task board, columns, drag, role-gated transitions</i>,
+done when <i>a Lead cannot move a task to Accomplished</i>. That milestone is already true in the
+database — assertion 25 of the Phase 1 suite proves it. <b>Phase 2's job is to make it true
+through the app</b>, and to make the board something a Super can actually work from on a tablet.</p>
+
+<table class="nobreak">
+  <tr><th style="width:50%">In scope</th><th>Explicitly not, and where it lives</th></tr>
+  <tr>
+    <td>
+      • Board of columns, tasks grouped beneath them<br>
+      • Drag a card between columns<br>
+      • Role gates on every transition, hidden in the UI and enforced in the database<br>
+      • Task detail — open a card, read it, act on it<br>
+      • Create a task against project, area, system<br>
+      • Assign to a Foreman, then to a Lead<br>
+      • Every move writes to <code>task_events</code>
+    </td>
+    <td>
+      • <b>Managing</b> custom columns — Phase 6a. Existing ones render; nothing creates or edits them yet.<br>
+      • Time capture and crew selection — Phase 3<br>
+      • Photos, quantity, close-out — Phase 4<br>
+      • Rework reasons and push — Phase 5<br>
+      • Blocked-days clock on blocked columns — Phase 6b<br>
+      • The progress page — Phase 7
+    </td>
+  </tr>
+</table>
+
+<div class="box">
+<b>The rule that shapes the whole screen.</b> Custom columns sit on top of six locked core
+statuses. Dragging inside one core status is free. Crossing a boundary fires the role gate and
+writes an event. The board must make that distinction obvious without explaining it — a card that
+cannot cross should not look draggable across.
+</div>
+
+<h2>2. The board, drawn</h2>
+<svg viewBox="0 0 700 210" width="100%" height="210" role="img"
+     aria-label="Board layout: six core status groups across the screen, custom columns nested inside In Progress, Review and Rework, with cards beneath each.">
+  <g font-family="Georgia,serif" font-size="9.5" text-anchor="middle">
+    <rect x="2" y="4" width="696" height="24" rx="4" fill="#f4f3ef" stroke="#dcdbd6"/>
+    <text x="350" y="20" font-size="9" fill="#5b6068">Welcome Building — Phase 2 · 2601 · you are Superintendent here</text>
+
+    <g>
+      <rect x="4"   y="38" width="104" height="20" rx="3" fill="#f0efeb" stroke="#8a8f96"/><text x="56"  y="52">Open</text>
+      <rect x="116" y="38" width="104" height="20" rx="3" fill="#e6eef7" stroke="#3d6ea8"/><text x="168" y="52">Assigned</text>
+      <rect x="228" y="38" width="160" height="20" rx="3" fill="#e2f0ec" stroke="#2a7a67"/><text x="308" y="52">In Progress</text>
+      <rect x="396" y="38" width="128" height="20" rx="3" fill="#f9f0da" stroke="#b8862a"/><text x="460" y="52">Review</text>
+      <rect x="532" y="38" width="80"  height="20" rx="3" fill="#f8e6e2" stroke="#a9402f"/><text x="572" y="52">Rework</text>
+      <rect x="620" y="38" width="76"  height="20" rx="3" fill="#e4f0e6" stroke="#3f7f4a"/><text x="658" y="52">Accompl.</text>
+    </g>
+
+    <g font-size="7.5" fill="#5b6068">
+      <rect x="230" y="62" width="76" height="14" rx="2" fill="#fff" stroke="#c9d6d2"/><text x="268" y="72">In Progress</text>
+      <rect x="310" y="62" width="76" height="14" rx="2" fill="#fff" stroke="#c9d6d2"/><text x="348" y="72">Waiting on GC</text>
+      <rect x="398" y="62" width="60" height="14" rx="2" fill="#fff" stroke="#e0d3ac"/><text x="428" y="72">Inspection</text>
+      <rect x="462" y="62" width="60" height="14" rx="2" fill="#fff" stroke="#e0d3ac"/><text x="492" y="72">Review</text>
+      <rect x="534" y="62" width="76" height="14" rx="2" fill="#fff" stroke="#eccfc9"/><text x="572" y="72">Punch list</text>
+    </g>
+
+    <g font-size="7.5">
+      <rect x="6"   y="82" width="100" height="30" rx="3" fill="#fff" stroke="#dcdbd6"/>
+      <text x="56" y="94" fill="#16181d">Underground stubs</text><text x="56" y="105" fill="#5b6068">Area A · sanitary · 40h</text>
+      <rect x="118" y="82" width="100" height="30" rx="3" fill="#fff" stroke="#dcdbd6"/>
+      <text x="168" y="94" fill="#16181d">2nd flr branch</text><text x="168" y="105" fill="#5b6068">Junior Alvarez · 64h</text>
+      <rect x="232" y="82" width="72" height="30" rx="3" fill="#fff" stroke="#dcdbd6"/>
+      <text x="268" y="94" fill="#16181d">RTU gas</text><text x="268" y="105" fill="#5b6068">Cal Mendoza</text>
+      <rect x="536" y="82" width="72" height="30" rx="3" fill="#fff" stroke="#dcdbd6"/>
+      <text x="572" y="94" fill="#16181d">Hangers</text><text x="572" y="105" fill="#a9402f">rework ×1</text>
+    </g>
+
+    <g stroke="#2a7a67" stroke-width="1.2" fill="none" stroke-dasharray="3 2">
+      <path d="M306,97 H310"/>
+    </g>
+    <text x="330" y="128" font-size="7.5" fill="#2a7a67">free — same core status</text>
+
+    <g stroke="#a9402f" stroke-width="1.2" fill="none">
+      <path d="M460,112 V126 Q460,132 468,132 H520"/>
+    </g>
+    <text x="604" y="135" font-size="7.5" fill="#a9402f" text-anchor="end">crosses a boundary — role gate + event</text>
+
+    <rect x="620" y="82" width="76" height="30" rx="3" fill="#f7f7f5" stroke="#dcdbd6" stroke-dasharray="3 2"/>
+    <text x="658" y="99" font-size="7.5" fill="#8a8f96">Super only</text>
+
+    <g font-size="7.5" fill="#5b6068" text-anchor="start">
+      <text x="6" y="160">A Lead sees this same board. The Accomplished column refuses his card, the</text>
+      <text x="6" y="172">cards that are not his do not lift, and the database refuses him regardless —</text>
+      <text x="6" y="184">the UI only saves him the round trip.</text>
+    </g>
+  </g>
+</svg>
+
+<h2>3. Build order</h2>
+<table>
+  <tr><th style="width:5%">#</th><th style="width:30%">Step</th><th>Done when</th></tr>
+  <tr><td>1</td><td>Board data layer — load columns and tasks for a project, grouped</td><td>The seeded Welcome Building renders its ten columns with its three tasks in the right places</td></tr>
+  <tr><td>2</td><td>Board layout, tablet first</td><td>Ten columns scroll horizontally on an iPad without the cards becoming unreadable</td></tr>
+  <tr><td>3</td><td>Task detail sheet</td><td>Tapping a card shows title, area, system, estimate, who it is assigned to, and its event history</td></tr>
+  <tr><td>4</td><td>Transition engine — one place that decides what a move means</td><td>Moving to a column derives the new core status from that column, never the other way round</td></tr>
+  <tr><td>5</td><td>Role gates in the UI</td><td>A Lead cannot begin a drag toward Accomplished; a Foreman sees no sign-off action</td></tr>
+  <tr><td>6</td><td>Drag and drop</td><td>A card moves between columns and the change survives a reload</td></tr>
+  <tr><td>7</td><td>Create and assign</td><td>A Super creates a task, assigns a Foreman, the Foreman assigns a Lead</td></tr>
+  <tr><td>8</td><td>Optimistic move with rollback</td><td>A refused move snaps back and says why, rather than lying about having worked</td></tr>
+  <tr><td>9</td><td>Tests extended</td><td>New assertions for column-to-status derivation and in-status moves; screenshots cover the board as Super and as Lead</td></tr>
+</table>
+
+<h2>4. Decisions to make while building</h2>
+<table>
+  <tr><th style="width:34%">Question</th><th>Leaning, and why</th></tr>
+  <tr><td>Group by core status, or show columns flat?</td><td><b>Grouped.</b> Ten flat columns on a tablet is a scroll with no landmarks. Grouping under the six core statuses makes the locked structure visible, which is the thing the whole model rests on.</td></tr>
+  <tr><td>What does a Lead see?</td><td><b>The whole board, moving only his own cards.</b> He needs to know what is coming. Already how the policies are written.</td></tr>
+  <tr><td>Drag on a phone?</td><td><b>No.</b> Phone gets a tap-to-move action sheet. Dragging a card across ten columns one-handed on a ladder is a bad idea.</td></tr>
+  <tr><td>Optimistic or wait for the server?</td><td><b>Optimistic with rollback.</b> A board that pauses on every drag feels broken on site Wi-Fi. But a refused move must visibly snap back.</td></tr>
+  <tr><td>Offline moves?</td><td><b>Not yet.</b> Offline is Phase 3+ and belongs with the close-out queue, which is where losing data actually costs something.</td></tr>
+</table>
+
+<h2>5. Risks specific to this phase</h2>
+<table>
+  <tr><th style="width:34%">Risk</th><th>Handling</th></tr>
+  <tr><td>The UI and the database disagree about what a role may do</td><td>The UI never decides — it reads the same matrix the policies implement, and a refusal from the server is always believed over the local guess. When they disagree the user sees an error, not a silent no-op.</td></tr>
+  <tr><td>Drag-and-drop is fiddly with gloves</td><td>Large cards, generous drop targets, and a tap-to-move path that does not require dragging at all. Test with the Leads before Phase 8, not after.</td></tr>
+  <tr><td>Ten columns is already too many</td><td>Grouping under core status buys room, but SPEC's own risk list says cap custom columns per project. That cap belongs in Phase 6a when column management is built.</td></tr>
+  <tr><td>A move that half-succeeds</td><td>Status and <code>board_column_id</code> change together or not at all — the database trigger already refuses a mismatch, so the app must send both in one update.</td></tr>
+</table>
+
+<h2>6. Checklist</h2>
+<ul class="chk">
+  <li>Board renders the seeded project, grouped by core status</li>
+  <li>Cards show what a Super needs at a glance: title, area, system, who, hours, rework count</li>
+  <li>Tapping a card opens its detail and its event history</li>
+  <li>A move derives status from the target column, never the reverse</li>
+  <li>A Lead cannot drag toward Accomplished — <b>the milestone</b></li>
+  <li>A refused move snaps back and explains itself</li>
+  <li>Create a task; assign Foreman then Lead</li>
+  <li>New database assertions for column-to-status derivation</li>
+  <li>Screenshots cover the board as Super and as Lead</li>
+  <li>CI green on all four jobs</li>
+</ul>
+
+<div class="box good">
+<b>Phase 2 is done when</b> a Lead, signed in on an iPad, can see his whole job, move his own
+work forward, and finds the Accomplished column closed to him — with the database refusing him
+even if the screen ever forgets to.
+</div>
+
+</body>
+</html>
